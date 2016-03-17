@@ -1,0 +1,160 @@
+
+clear all;
+close all;
+clc;
+warning('off');
+
+
+
+
+global SensorNumAttached; % number of attached sensors
+global measurementRate; % measurement rate
+
+disp('Initialization in progress; please wait a moment...')
+
+% Free memory
+clear Record;
+clear pRecord;
+% Check if library is loaded
+if libisloaded('ATC3DG')
+    unloadlibrary ATC3DG;
+end
+
+% Loading the ATC3DG library
+[notfound,warnings]=loadlibrary('ATC3DG', 'ATC3DG.h');
+
+% Check if loading library is successful
+CheckLibrary = libisloaded('ATC3DG');
+if not(CheckLibrary)
+    error('Problem load library: loadlibrary');
+    clear all;
+end
+
+% Initialize the system
+temp  = calllib('ATC3DG', 'InitializeBIRDSystem');
+errorHandler(temp);
+% Get system configuration
+Record3         = libstruct('tagSYSTEM_CONFIGURATION'); 
+Record3.agcMode = 0;
+pRecord3        = libpointer('tagSYSTEM_CONFIGURATION', Record3);
+temp3           = calllib('ATC3DG', 'GetBIRDSystemConfiguration', pRecord3);
+errorHandler(temp3)
+measurementRate = Record3.measurementRate;
+
+% Get sensor configuration
+Records0        = libstruct('tagSENSOR_CONFIGURATION'); 
+Records0.type   = 11;
+pRecords0       = libpointer('tagSENSOR_CONFIGURATION', Records0);
+temps0          = calllib('ATC3DG', 'GetSensorConfiguration', 0, pRecords0);
+errorHandler(temps0);
+
+Records1        = libstruct('tagSENSOR_CONFIGURATION'); 
+Records1.type   = 11;
+pRecords1       = libpointer('tagSENSOR_CONFIGURATION', Records1);
+temps1          = calllib('ATC3DG', 'GetSensorConfiguration', 1, pRecords1);
+errorHandler(temps1);
+
+Records2        = libstruct('tagSENSOR_CONFIGURATION'); 
+Records2.type   = 11;
+pRecords2       = libpointer('tagSENSOR_CONFIGURATION', Records2);
+temps2          = calllib('ATC3DG', 'GetSensorConfiguration', 2, pRecords2);
+errorHandler(temps2);
+
+Records3        = libstruct('tagSENSOR_CONFIGURATION'); 
+Records3.type   = 11;
+pRecords3       = libpointer('tagSENSOR_CONFIGURATION', Records3);
+temps3          = calllib('ATC3DG', 'GetSensorConfiguration', 3, pRecords3);
+errorHandler(temps3);
+
+% Record attached sensor number
+SensorNumAttached  = [Records0.attached Records1.attached Records2.attached ...
+                      Records3.attached];
+
+
+                  
+% Turn ON Transmitter
+tempSetP    = calllib('ATC3DG', 'SetSystemParameter', 0, 0, 2);
+errorHandler(tempSetP);
+
+% Set sensor parameters
+var       = int32(26);%(19);
+
+for count = 0:3
+    Error1 = calllib('ATC3DG', 'SetSensorParameter', count, 0, var, 4);
+    errorHandler(Error1);
+end
+
+
+if (temp == 0)
+    disp('System initialized: Done')
+else
+    error('Problem initialising the system: InitializeBIRDSystem');
+end
+
+%**************************************************************************
+%**************************************************************************
+OptDispl = 0;
+
+% Get synchronous Record
+sm.x = 0;   sm.y = 0;   sm.z = 0; sm.a = 0;   sm.e = 0;  sm.r = 0;
+sm.time = 0;  sm.quality = 0;
+Record  = libstruct('tagDOUBLE_POSITION_ANGLES_TIME_Q_RECORD', sm);  
+pRecord = libpointer('tagDOUBLE_POSITION_ANGLES_TIME_Q_RECORD', Record);
+%########################################################################
+Record1  = libstruct('tagDOUBLE_POSITION_ANGLES_TIME_Q_RECORD', sm);  
+pRecord1 = libpointer('tagDOUBLE_POSITION_ANGLES_TIME_Q_RECORD', Record1);
+
+Record2  = libstruct('tagDOUBLE_POSITION_ANGLES_TIME_Q_RECORD', sm);  
+pRecord2 = libpointer('tagDOUBLE_POSITION_ANGLES_TIME_Q_RECORD', Record2);
+
+Record3  = libstruct('tagDOUBLE_POSITION_ANGLES_TIME_Q_RECORD', sm);  
+pRecord3 = libpointer('tagDOUBLE_POSITION_ANGLES_TIME_Q_RECORD', Record3);
+
+Record4  = libstruct('tagDOUBLE_POSITION_ANGLES_TIME_Q_RECORD', sm);  
+pRecord4 = libpointer('tagDOUBLE_POSITION_ANGLES_TIME_Q_RECORD', Record4);
+
+ttttt = [pRecord1; pRecord2; pRecord3 ;pRecord4];
+%########################################################################
+
+Counter    = 0;% number of samples
+senSorPre  = [1 1 1 1];% Index sensors present 
+NumSenPres = sum(SensorNumAttached);% number of sensors present
+
+for kk=1:10
+    clc
+    Counter = Counter + 1;
+    Record  = libstruct('tagDOUBLE_POSITION_ANGLES_TIME_Q_RECORD', sm);  
+    pRecord = libpointer('tagDOUBLE_POSITION_ANGLES_TIME_Q_RECORD', Record);
+
+    % Get synchronous Record
+    Error   = calllib('ATC3DG', 'GetAsynchronousRecord',  -1, ttttt, 4*64);
+    errorHandler(Error);
+
+    Pos(Counter, 1, count)       = Record.x;
+    Pos(Counter, 2, count)       = Record.y;
+    Pos(Counter, 3, count)       = Record.z;
+    Ang(Counter, 1, count)       = Record.a;
+    Ang(Counter, 2, count)       = Record.e;
+    Ang(Counter, 3, count)       = Record.r;   
+    Quality(Counter, 1, count)   = Record.quality;                  
+        
+%     TimStam(Counter/4)  = Record.time;
+end
+indsenSorPre =  find(senSorPre == 1);
+%**************************************************************************
+%**************************************************************************
+% Free memory
+clear Record3;
+clear pRecord3;
+clear Records0;
+clear pRecords0;
+clear Records1;
+clear pRecords1;
+clear Records2;
+clear pRecords2;
+clear Records3;
+clear pRecords3;
+clear pVar;
+
+Pos
+figure, plot(Pos(:,1,1)), hold on, plot(Pos(:,1,2),'r'); hold on, plot(Pos(:,1,3),'k')

@@ -1,0 +1,11 @@
+% ErrorSetup 
+% Ascension Technology Corporation 
+function ErrorSetup(y)
+if y == 0
+    close all;
+    msgbox('System was not initialized, please click "Setup DriveBay" on the "Run DriveBay" menu to initialize the system',...
+        'error', 'modal');
+    error('Error: You must run "Setup DriveBay" first', ...
+          'System was not initialized, please click "Setup DriveBay" on the "Run DriveBay" menu to initialize the system');
+    
+end

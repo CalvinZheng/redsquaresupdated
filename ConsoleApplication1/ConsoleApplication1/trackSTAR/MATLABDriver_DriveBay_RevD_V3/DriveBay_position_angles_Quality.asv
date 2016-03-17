@@ -1,0 +1,39 @@
+function DriveBay_position_angles_Quality
+% DriveBay_position_angles: displays attached sensors positions, angles 
+% and the quality number at the MATLAB command window
+
+% Ascension Technology Corporation 
+
+global SensorNumAttached; % number of attached sensors
+
+
+clf;% clear figure
+for count = 1:4
+    if SensorNumAttached(count)
+        % Get Asynchronous Record
+        Record1  = libstruct('tagDOUBLE_POSITION_ANGLES_TIME_Q_RECORD');  
+        pRecord1 = libpointer('tagDOUBLE_POSITION_ANGLES_TIME_Q_RECORD', Record1);
+        
+        % Display data at the MATLAB command window
+        Error    = calllib('ATC3DG', 'GetAsynchronousRecord', count - 1, pRecord1, 64);
+        if (Error ~= 0 )
+            display('error in GetAsynchronousRecord')
+        end
+        display(sprintf('\nSensor number %g position and angles in inches and degrees, respectively.', ...
+                        count))
+        disp(sprintf('x = %g inches', Record1.x )) 
+        disp(sprintf('y = %g inches', Record1.y )) 
+        disp(sprintf('z = %g inches', Record1.z )) 
+
+        disp(sprintf('a = %g degrees', Record1.a ))
+        disp(sprintf('e = %g degrees', Record1.e )) 
+        disp(sprintf('r = %g degrees', Record1.r ))
+        
+        disp(sprintf('quality = %g ', Record1.quality) )
+
+    end
+end
+
+
+
+

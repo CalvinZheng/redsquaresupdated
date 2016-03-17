@@ -1,0 +1,180 @@
+function DriveBay_stream_plot(OptDispl)
+% DriveBay_stream_plot:  designed to place the tracker in a stream mode. 
+% input: OptDispl
+%        (OptDispl = 1) => sensor position is displayed on the MATLAB
+%        command window
+%        (OptDispl = 0) => sensor position is not displayed
+% Ascension Technology Corporation 
+
+global SensorNumAttached; % number of attached sensors
+global measurementRate;  % measurement rate
+global hMainfig; % figure handler
+global gui;
+
+clf;% clear figure
+setup_views    % load pull downmenu for pre defined views
+
+gui.start_proc = 0;
+gui.stop_proc  = 0;
+
+%maximize;% maximize figure window
+
+if length(findobj(gcf,'Label','Run DriveBay'))==1
+    hMainfig('Run DriveBay', 'off');
+end
+hfig = figure('Position',[408 327 360 244],...
+                'MenuBar','none', ...
+                'Name','Procedure Menu',...
+                'NumberTitle','off');
+% Start button
+hpush_start = uicontrol(hfig,'Style','pushbutton');
+set(hpush_start,'Position',[20 200 150 20]); %[left bottom width height]
+set(hpush_start,'String','Start STREAM I/O');
+set(hpush_start,'Callback','gui.start_proc=1;');
+
+% stop button
+hpush_stop = uicontrol(hfig,'Style','pushbutton');
+set(hpush_stop,'Position',[20 150 150 20]); %[left bottom width height]
+set(hpush_stop,'String','Stop STREAM I/O');
+set(hpush_stop,'Callback','gui.stop_proc=1;');
+set(hpush_stop,'Enable','off');
+
+
+
+while (gui.start_proc == 0)
+    drawnow
+    disp('waiting to start');
+    clc;
+end
+set(hpush_start,'Enable','off');
+set(hpush_stop,'Enable','on');
+
+% Get synchronous Record
+sm.x = 0;   sm.y = 0;   sm.z = 0; sm.a = 0;   sm.e = 0;  sm.r = 0;
+sm.time = 0;  sm.quality = 0;
+
+Record1  = libstruct('tagDOUBLE_POSITION_ANGLES_TIME_Q_RECORD', sm);  
+pRecord1 = libpointer('tagDOUBLE_POSITION_ANGLES_TIME_Q_RECORD', Record1);
+
+Record2  = libstruct('tagDOUBLE_POSITION_ANGLES_TIME_Q_RECORD', sm);  
+pRecord2 = libpointer('tagDOUBLE_POSITION_ANGLES_TIME_Q_RECORD', Record2);
+
+Record3  = libstruct('tagDOUBLE_POSITION_ANGLES_TIME_Q_RECORD', sm);  
+pRecord3 = libpointer('tagDOUBLE_POSITION_ANGLES_TIME_Q_RECORD', Record3);
+
+Record4  = libstruct('tagDOUBLE_POSITION_ANGLES_TIME_Q_RECORD', sm);  
+pRecord4 = libpointer('tagDOUBLE_POSITION_ANGLES_TIME_Q_RECORD', Record4);
+
+Counter    = 0;% number of samples
+senSorPre  = [1 1 1 1];% Index sensors present 
+NumSenPres = sum(SensorNumAttached);% number of sensors present
+
+while (gui.stop_proc == 0 )
+    clc
+        % Get synchronous Record
+        Error   = calllib('ATC3DG', 'GetAsynchronousRecord',  0, Record1, 64);
+        errorHandler(Error);
+
+        Error   = calllib('ATC3DG', 'GetAsynchronousRecord',  1, Record2, 64);
+        errorHandler(Error);
+
+        Error   = calllib('ATC3DG', 'GetAsynchronousRecord',  2, Record3, 64);
+        errorHandler(Error);
+
+        Error   = calllib('ATC3DG', 'GetAsynchronousRecord',  3, Record4, 64);
+        errorHandler(Error);
+    for count = 1:4
+        Counter = Counter + 1;
+        if(count == 1)
+            Pos(Counter, 1, count)   = Record1.x;
+            Pos(Counter, 2, count)   = Record1.y;
+            Pos(Counter, 3, count)   = Record1.z;
+            Ang(Counter, 1, count)   = Record1.a;
+            Ang(Counter, 2, count)   = Record1.e;
+            Ang(Counter, 3, count)   = Record1.r;   
+            Quality(Counter, 1, count)   = Record1.quality; 
+        end
+        if(count == 2)
+            Pos(Counter, 1, count)   = Record2.x;
+            Pos(Counter, 2, count)   = Record2.y;
+            Pos(Counter, 3, count)   = Record2.z;
+            Ang(Counter, 1, count)   = Record2.a;
+            Ang(Counter, 2, count)   = Record2.e;
+            Ang(Counter, 3, count)   = Record2.r;   
+            Quality(Counter, 1, count)   = Record2.quality; 
+        end
+        if(count == 3)
+            Pos(Counter, 1, count)   = Record3.x;
+            Pos(Counter, 2, count)   = Record3.y;
+            Pos(Counter, 3, count)   = Record3.z;
+            Ang(Counter, 1, count)   = Record3.a;
+            Ang(Counter, 2, count)   = Record3.e;
+            Ang(Counter, 3, count)   = Record3.r;   
+            Quality(Counter, 1, count)   = Record3.quality; 
+        end
+        if(count == 4)
+            Pos(Counter, 1, count)   = Record4.x;
+            Pos(Counter, 2, count)   = Record4.y;
+            Pos(Counter, 3, count)   = Record4.z;
+            Ang(Counter, 1, count)   = Record4.a;
+            Ang(Counter, 2, count)   = Record4.e;
+            Ang(Counter, 3, count)   = Record4.r;   
+            Quality(Counter, 1, count)   = Record4.quality; 
+        end
+        if (OptDispl==1)
+            display(sprintf('\nSensor number %g position in inches: ',...
+                    count))
+            disp([Pos(Counter, 1, count) Pos(Counter, 2, count)...
+                  Pos(Counter, 3, count)])
+        end
+        drawnow  % forces Matlab to evaluate Callback in figure
+    end
+    TimStam(Counter/4)  = Record1.time;        
+end
+indsenSorPre =  find(senSorPre == 1);
+
+set(hpush_stop,'Enable','off'); % show that button has been pressed
+close(hfig)
+
+
+% Define an array of colors for each sensor
+colorstr_ar = [{'r'} {'b'} {'g'} {'m'}];
+while length(colorstr_ar)<NumSenPres  
+    colorstr_ar = [colorstr_ar colorstr_ar]; % repeat colors if array is not long enough
+end
+
+% plot trajectory of each 
+for count=1:NumSenPres
+    colorstr = char(colorstr_ar(count));
+    plot3(Pos(indsenSorPre(count):4:Counter - 1, 1,indsenSorPre(count)),...
+          Pos(indsenSorPre(count):4:Counter - 1, 2,indsenSorPre(count)), ...
+          Pos(indsenSorPre(count):4:Counter - 1, 3,indsenSorPre(count)),colorstr);
+    drawnow;
+    hold on;
+end    
+
+% define labels and titles
+xlabel('X'); ylabel('Y'); zlabel('Z');
+title_str = ['Position of Sensor: ' int2str(Counter) ' points, sampled at approx. ' ...
+              num2str(measurementRate) ' hz'];
+title(title_str);
+
+% setup legend
+for count=1:NumSenPres
+    legend_str(count) = {['Sensor ' int2str(indsenSorPre(count))]};    
+end        
+legend(legend_str);
+
+% Force the DriveBay system to come out of STREAM mode by issuing the 
+% command GetSensorStatus
+for count = 1:4
+    if SensorNumAttached(count)
+        Error1 = calllib('ATC3DG', 'GetSensorStatus', count - 1);
+        errorHandler(Error1);
+    end
+end
+
+
+
+
+

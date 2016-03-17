@@ -1,0 +1,13 @@
+clear all;
+close all;
+clc
+% 
+for kk = 0:11,
+   evalc(['sm.x' num2str(kk) '=0']));
+   
+end
+
+% for d=1:10
+%    s = ['load August' int2str(d) '.mat'];
+% %   eval(s)
+% end

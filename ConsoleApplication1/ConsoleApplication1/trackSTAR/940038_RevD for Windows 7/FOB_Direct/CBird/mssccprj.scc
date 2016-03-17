@@ -1,0 +1,9 @@
+SCC = This is a Source Code Control file
+
+[HC.MAK]
+SCC_Aux_Path = "\\EAGLE\CODE\SourceSafe\ascension"
+SCC_Project_Name = "$/LaserBird/User Diskette/Direct/CBird", CYBAAAAA
+
+[UNIX.MAK]
+SCC_Aux_Path = "\\EAGLE\CODE\SourceSafe\ascension"
+SCC_Project_Name = "$/LaserBird/User Diskette/Direct/CBird", CYBAAAAA

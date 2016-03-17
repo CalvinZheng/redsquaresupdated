@@ -1,0 +1,326 @@
+
+clear all;
+close all;
+clc;
+warning('off');
+
+
+
+
+global SensorNumAttached; % number of attached sensors
+global measurementRate; % measurement rate
+
+disp('Initialization in progress; please wait a moment...')
+
+% Free memory
+clear Record;
+clear pRecord;
+% Check if library is loaded
+if libisloaded('ATC3DG')
+    unloadlibrary ATC3DG;
+end
+
+% Loading the ATC3DG library
+[notfound,warnings]=loadlibrary('ATC3DG', 'ATC3DG.h');
+
+% Check if loading library is successful
+CheckLibrary = libisloaded('ATC3DG');
+if not(CheckLibrary)
+    error('Problem load library: loadlibrary');
+    clear all;
+end
+
+% Initialize the system
+temp  = calllib('ATC3DG', 'InitializeBIRDSystem');
+errorHandler(temp);
+% Get system configuration
+Record3         = libstruct('tagSYSTEM_CONFIGURATION'); 
+Record3.agcMode = 0;
+pRecord3        = libpointer('tagSYSTEM_CONFIGURATION', Record3);
+temp3           = calllib('ATC3DG', 'GetBIRDSystemConfiguration', pRecord3);
+errorHandler(temp3)
+measurementRate = Record3.measurementRate;
+
+% Get sensor configuration
+Records0        = libstruct('tagSENSOR_CONFIGURATION'); 
+Records0.type   = 11;
+pRecords0       = libpointer('tagSENSOR_CONFIGURATION', Records0);
+temps0          = calllib('ATC3DG', 'GetSensorConfiguration', 0, pRecords0);
+errorHandler(temps0);
+
+Records1        = libstruct('tagSENSOR_CONFIGURATION'); 
+Records1.type   = 11;
+pRecords1       = libpointer('tagSENSOR_CONFIGURATION', Records1);
+temps1          = calllib('ATC3DG', 'GetSensorConfiguration', 1, pRecords1);
+errorHandler(temps1);
+
+Records2        = libstruct('tagSENSOR_CONFIGURATION'); 
+Records2.type   = 11;
+pRecords2       = libpointer('tagSENSOR_CONFIGURATION', Records2);
+temps2          = calllib('ATC3DG', 'GetSensorConfiguration', 2, pRecords2);
+errorHandler(temps2);
+
+Records3        = libstruct('tagSENSOR_CONFIGURATION'); 
+Records3.type   = 11;
+pRecords3       = libpointer('tagSENSOR_CONFIGURATION', Records3);
+temps3          = calllib('ATC3DG', 'GetSensorConfiguration', 3, pRecords3);
+errorHandler(temps3);
+
+% Record attached sensor number
+SensorNumAttached  = [Records0.attached Records1.attached Records2.attached ...
+                      Records3.attached];
+
+%**************************************************************************
+%**************************************************************************
+% setup figure
+set(0,'Units','pixels') 
+scnsize  = get(0,'ScreenSize');
+pos2     = [ scnsize(3)/2-30, scnsize(4)/2-30 ,scnsize(3)/2 - 70, scnsize(4)/2- 70 ];
+hMainfig = figure('Position',pos2);
+axes('position',[.1  .1  .8  .6])
+view(3)
+axis vis3d  % set axis for proper 3D visulization
+setup_views    % load pull downmenu for pre defined views
+
+s1 =num2str(0); s2 =num2str(0); s3 =num2str(0);s4 =num2str(0);
+xs1 =num2str(0); xs2 =num2str(0); xs3 =num2str(0);xs4 =num2str(0);
+ys1 =num2str(0); ys2 =num2str(0); ys3 =num2str(0);ys4 =num2str(0);
+zs1 =num2str(0); zs2 =num2str(0); zs3 =num2str(0);zs4 =num2str(0);
+as1 =num2str(0); as2 =num2str(0); as3 =num2str(0);as4 =num2str(0);
+es1 =num2str(0); es2 =num2str(0); es3 =num2str(0);es4 =num2str(0);
+rs1 =num2str(0); rs2 =num2str(0); rs3 =num2str(0);rs4 =num2str(0);
+qs1 =num2str(0); qs2 =num2str(0); qs3 =num2str(0);qs4 =num2str(0);
+
+% creates a uipanel to display quality number for each attached sensor
+hp   = uipanel('parent',hMainfig,...
+             'Position',[.0 .75 1 1]);
+           
+hbsx = uicontrol('Style', 'text','Parent',hp,'String','x', ...
+                 'fontSize', 12,...                 
+                 'Position',[132 140 100 26]);
+pox = getpixelposition(hbsx);             
+             
+hbsy = uicontrol('Style', 'text','Parent',hp,'String','y', ...
+                 'fontSize', 12,...                 
+                 'Position',[110 0 0 0] + pox);
+poy = getpixelposition(hbsy);  
+
+
+hbsz = uicontrol('Style', 'text','Parent',hp,'String','z', ...
+                 'fontSize', 12,...                 
+                 'Position',[100 0 0 0] + poy);
+poz = getpixelposition(hbsz);             
+
+hbsa = uicontrol('Style', 'text','Parent',hp,'String','azimuth', ...
+                 'fontSize', 12,...                 
+                 'Position',[90 0 0 0] + poz);
+poa = getpixelposition(hbsa);             
+
+hbse = uicontrol('Style', 'text','Parent',hp,'String','elevation', ...
+                 'fontSize', 12,...                 
+                 'Position',[100 0 0 0] + poa);
+poe = getpixelposition(hbse);        
+
+hbsr = uicontrol('Style', 'text','Parent',hp,'String','roll', ...
+                 'fontSize', 12,...                 
+                 'Position',[100 0 0 0] + poe);
+por = getpixelposition(hbsr);  
+
+hbsq = uicontrol('Style', 'text','Parent',hp,'String','quality', ...
+                 'fontSize', 12,...                 
+                 'Position',[120 0 0 0] + por);
+poq = getpixelposition(hbsq);             
+
+hbs1 = uicontrol('Style', 'text','Parent',hp,'String','sensor 1',...
+                 'fontSize', 12,...
+                 'BackgroundColor',[ 0 0 1],...
+                 'Position',[18 110 100 26]);
+pos1 = getpixelposition(hbs1);             
+
+hbs2 = uicontrol('Style', 'text','Parent',hp,'String','sensor 2',...
+                 'fontSize', 12,...
+                 'BackgroundColor',[ 0 0 1],...
+                 'Position',[18 80 100 26]);
+pos2 = getpixelposition(hbs2);             
+             
+
+hbs3 = uicontrol('Style', 'text','Parent',hp,'String','sensor 3',...
+                 'fontSize', 12,...
+                 'BackgroundColor',[ 0 0 1],...
+                 'Position',[18 50 100 26]);
+pos3 = getpixelposition(hbs3);             
+                          
+hbs4 = uicontrol('Style', 'text','Parent',hp,'String','sensor 4',...
+                 'fontSize', 12,...
+                 'BackgroundColor',[ 0 0 1],...
+                 'Position',[18 20 100 26]);
+pos4 = getpixelposition(hbs4);             
+             
+             
+             
+% x-Position
+hbsx1 = uicontrol('Style', 'text','Parent',hp,'String','x1',...
+                 'fontSize', 12,...                 
+                 'tag', xs1,'Callback', 'cla','Position',[120 0 0 0] + pos1);
+posx1 = getpixelposition(hbsx1);
+
+hbsx2 = uicontrol('Style', 'text','Parent',hp,'String','x2',...
+                 'fontSize', 12,...                 
+                 'tag', xs2,'Callback', 'cla','Position',[120 0 0 0] + pos2);
+posx2 = getpixelposition(hbsx2);
+             
+hbsx3 = uicontrol('Style', 'text','Parent',hp,'String','x3',...
+                 'fontSize', 12,...                 
+                 'tag', xs3,'Callback', 'cla','Position',[120 0 0 0] + pos3);
+posx3 = getpixelposition(hbsx3);
+             
+hbsx4 = uicontrol('Style', 'text','Parent',hp,'String','x4',...
+                 'fontSize', 12,...                 
+                 'tag', xs4,'Callback', 'cla','Position',[120 0 0 0] + pos4);
+posx4 = getpixelposition(hbsx4);
+
+
+[hbsy1 hbsy2 hbsy3 hbsy4 posy1 posy2 posy3 posy4] =  ...
+positionMoh(hp,xs1,xs2,xs3,xs4,posx1,posx2,posx3,posx4);
+
+[hbsz1 hbsz2 hbsz3 hbsz4 posz1 posz2 posz3 posz4] =  ...
+positionMoh(hp,ys1,ys2,ys3,ys4,posy1,posy2,posy3,posy4);
+
+[hbsa1 hbsa2 hbsa3 hbsa4 posa1 posa2 posa3 posa4] =  ...
+positionMoh(hp,as1,as2,as3,as4,posz1,posz2,posz3,posz4);
+
+[hbse1 hbse2 hbse3 hbse4 pose1 pose2 pose3 pose4] =  ...
+positionMoh(hp,es1,es2,es3,es4,posa1,posa2,posa3,posa4);
+
+[hbsr1 hbsr2 hbsr3 hbsr4 posr1 posr2 posr3 posr4] =  ...
+positionMoh(hp,rs1,rs2,rs3,rs4,pose1,pose2,pose3,pose4);
+
+[hbsq1 hbsq2 hbsq3 hbsq4 posq1 posq2 posq3 posq4] =  ...
+positionMoh(hp,rs1,rs2,rs3,rs4,posr1,posr2,posr3,posr4);
+
+
+% Initialize sensors quality to zero
+set(hbsx1, 'String', xs1);set(hbsx2, 'String', xs2);set(hbsx3, 'String', xs3);set(hbsx4, 'String', xs4);
+set(hbsy1, 'String', ys1);set(hbsy2, 'String', ys2);set(hbsy3, 'String', ys3);set(hbsy4, 'String', ys4);
+set(hbsz1, 'String', zs1);set(hbsz2, 'String', zs2);set(hbsz3, 'String', zs3);set(hbsz4, 'String', zs4);
+set(hbsa1, 'String', as1);set(hbsa2, 'String', as2);set(hbsa3, 'String', as3);set(hbsa4, 'String', as4);
+set(hbse1, 'String', es1);set(hbse2, 'String', es2);set(hbse3, 'String', es3);set(hbse4, 'String', es4);
+set(hbsr1, 'String', rs1);set(hbsr2, 'String', rs2);set(hbsr3, 'String', rs3);set(hbsr4, 'String', rs4);
+set(hbsq1, 'String', qs1);set(hbsq2, 'String', qs2);set(hbsq3, 'String', qs3);set(hbsq4, 'String', qs4);
+
+                  
+%**************************************************************************
+%**************************************************************************
+                  
+% Turn ON Transmitter
+tempSetP    = calllib('ATC3DG', 'SetSystemParameter', 0, 0, 2);
+errorHandler(tempSetP);
+
+% Set sensor parameters
+var       = int32(26);%(19);
+
+for count = 0:3
+    Error1 = calllib('ATC3DG', 'SetSensorParameter', count, 0, var, 4);
+    errorHandler(Error1);
+end
+
+
+if (temp == 0)
+    disp('System initialized: Done')
+else
+    error('Problem initialising the system: InitializeBIRDSystem');
+end
+
+
+% Free memory
+clear Record3;
+clear pRecord3;
+clear Records0;
+clear pRecords0;
+clear Records1;
+clear pRecords1;
+clear Records2;
+clear pRecords2;
+clear Records3;
+clear pRecords3;
+clear pVar;
+
+
+
+
+
+% % y-Position
+% hbsy1 = uicontrol('Style', 'text','Parent',hp,'String','y1',...
+%                  'fontSize', 12,...
+%                  'BackgroundColor',[ 1 0 1],...
+%                  'tag', ys1,'Callback', 'cla','Position',[100 0 0 0] + posx1);
+% posy1 = getpixelposition(hbsy1);
+% 
+% hbsy2 = uicontrol('Style', 'text','Parent',hp,'String','y2',...
+%                  'fontSize', 12,...
+%                  'BackgroundColor',[ 1 0 1],...
+%                  'tag', ys2,'Callback', 'cla','Position',[100 0 0 0] + posx2);
+% posy2 = getpixelposition(hbsy2);
+%              
+% hbsy3 = uicontrol('Style', 'text','Parent',hp,'String','y3',...
+%                  'fontSize', 12,...
+%                  'BackgroundColor',[ 1 0 1],...
+%                  'tag', ys3,'Callback', 'cla','Position',[100 0 0 0] + posx3);
+% posy3 = getpixelposition(hbsy3);
+%              
+% hbsy4 = uicontrol('Style', 'text','Parent',hp,'String','y4',...
+%                  'fontSize', 12,...
+%                  'BackgroundColor',[ 1 0 1],...
+%                  'tag', ys4,'Callback', 'cla','Position',[100 0 0 0] + posx4);
+% posy4 = getpixelposition(hbsy4);
+% 
+% 
+% % z-Position
+% hbsz1 = uicontrol('Style', 'text','Parent',hp,'String','z1',...
+%                  'fontSize', 12,...
+%                  'BackgroundColor',[ 1 0 1],...
+%                  'tag', ys1,'Callback', 'cla','Position',[100 0 0 0] + posy1);
+% posz1 = getpixelposition(hbsz1);
+% 
+% hbsz2 = uicontrol('Style', 'text','Parent',hp,'String','z2',...
+%                  'fontSize', 12,...
+%                  'BackgroundColor',[ 1 0 1],...
+%                  'tag', ys2,'Callback', 'cla','Position',[100 0 0 0] + posy2);
+% posz2 = getpixelposition(hbsz2);
+%              
+% hbsz3 = uicontrol('Style', 'text','Parent',hp,'String','z3',...
+%                  'fontSize', 12,...
+%                  'BackgroundColor',[ 1 0 1],...
+%                  'tag', ys3,'Callback', 'cla','Position',[100 0 0 0] + posy3);
+% posz3 = getpixelposition(hbsz3);
+%              
+% hbsz4 = uicontrol('Style', 'text','Parent',hp,'String','z4',...
+%                  'fontSize', 12,...
+%                  'BackgroundColor',[ 1 0 1],...
+%                  'tag', ys4,'Callback', 'cla','Position',[100 0 0 0] + posy4);
+% posz4 = getpixelposition(hbsz4);
+
+% % azimuth-Position
+% hbsa1 = uicontrol('Style', 'text','Parent',hp,'String','z1',...
+%                  'fontSize', 12,...
+%                  'BackgroundColor',[ 1 0 1],...
+%                  'tag', as1,'Callback', 'cla','Position',[100 0 0 0] + posz1);
+% posa1 = getpixelposition(hbsa1);
+% 
+% hbsa2 = uicontrol('Style', 'text','Parent',hp,'String','z2',...
+%                  'fontSize', 12,...
+%                  'BackgroundColor',[ 1 0 1],...
+%                  'tag', as2,'Callback', 'cla','Position',[100 0 0 0] + posz2);
+% posa2 = getpixelposition(hbsa2);
+%              
+% hbsa3 = uicontrol('Style', 'text','Parent',hp,'String','z3',...
+%                  'fontSize', 12,...
+%                  'BackgroundColor',[ 1 0 1],...
+%                  'tag', as3,'Callback', 'cla','Position',[100 0 0 0] + posz3);
+% posa3 = getpixelposition(hbsa3);
+%              
+% hbsa4 = uicontrol('Style', 'text','Parent',hp,'String','z4',...
+%                  'fontSize', 12,...
+%                  'BackgroundColor',[ 1 0 1],...
+%                  'tag', as4,'Callback', 'cla','Position',[100 0 0 0] + posz4);
+% posa4 = getpixelposition(hbsa4);

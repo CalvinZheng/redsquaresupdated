@@ -1,0 +1,11 @@
+Staircase: 0 numReversals: 0 BP: 0 Stereo: 2 Tracking: 0 HeadMotion: 0 Density: 11 depthDiff (dist): 7 dZ: 0.5 result: 0 p[0].x= 18 p[1].x= -32 p[0].z= -99.5 p[1].z= -92.5 alpha 1 key=22
+Staircase: 0 numReversals: 1 BP: 0 Stereo: 2 Tracking: 0 HeadMotion: 0 Density: 11 depthDiff (dist): 15.3367 dZ: 0.5 result: 1 p[0].x= 45 p[1].x= -37 p[0].z= -65.6683 p[1].z= -50.3317 alpha 1 key=11
+Staircase: 0 numReversals: 1 BP: 0 Stereo: 2 Tracking: 0 HeadMotion: 0 Density: 11 depthDiff (dist): 12.2693 dZ: 0.5 result: 1 p[0].x= 40 p[1].x= -28 p[0].z= -85.8653 p[1].z= -98.1347 alpha 1 key=22
+Staircase: 0 numReversals: 1 BP: 0 Stereo: 2 Tracking: 0 HeadMotion: 0 Density: 11 depthDiff (dist): 9.81546 dZ: 0.5 result: 1 p[0].x= 32 p[1].x= -38 p[0].z= -99.0923 p[1].z= -108.908 alpha 1 key=22
+Staircase: 0 numReversals: 2 BP: 0 Stereo: 2 Tracking: 0 HeadMotion: 0 Density: 11 depthDiff (dist): 7.85237 dZ: 0.5 result: 0 p[0].x= 20 p[1].x= -33 p[0].z= -96.9262 p[1].z= -89.0738 alpha 1 key=22
+Staircase: 0 numReversals: 3 BP: 0 Stereo: 2 Tracking: 0 HeadMotion: 0 Density: 11 depthDiff (dist): 17.2042 dZ: 0.5 result: 1 p[0].x= 45 p[1].x= -29 p[0].z= -109.602 p[1].z= -92.3979 alpha 1 key=11
+Staircase: 0 numReversals: 3 BP: 0 Stereo: 2 Tracking: 0 HeadMotion: 0 Density: 11 depthDiff (dist): 13.7633 dZ: 0.5 result: 1 p[0].x= 22 p[1].x= -37 p[0].z= -75.1183 p[1].z= -88.8817 alpha 1 key=22
+StairCase 0 : NumResults: 3 result: 13.4644
+		numReversals: 3 15.3367 7.85237 17.2042 last 3 : 2.5454
+
+ total number of trials: 7

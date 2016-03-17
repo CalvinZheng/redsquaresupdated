@@ -1,0 +1,169 @@
+function [Pos, Ang, TimStam, Quality, Error] = DriveBay_stream_save(OptDispl)
+% The DriveBay_stream_save function is designed to place the tracker in a 
+% stream mode. 
+% input: OptDispl
+%        (OptDispl = 1) => sensor position is displayed on the MATLAB
+%        command window
+%        (OptDispl = 1) => sensor position is not displayed
+% output: Pos: Attached sensors positions
+%         Ang: Attached sensors angles
+%         TimStam : timestamp
+%         Error: Error code
+% Ascension Technology Corporation 
+
+global SensorNumAttached;
+global hMainfig;
+global gui;
+
+clf;
+
+TRUE=1;FALSE=0;
+ON=1;OFF=0;
+
+gui.start_proc = 0;
+gui.stop_proc  = 0;
+
+if length(findobj(gcf,'Label','Run DriveBay'))==1
+    hMainfig('Run DriveBay', 'off');
+end
+hfig = figure('Position',[408 327 360 244],...
+    'MenuBar','none', ...
+    'Name','Procedure Menu',...
+    'NumberTitle','off');
+% Start button
+hpush_start = uicontrol(hfig,'Style','pushbutton');
+set(hpush_start,'Position',[20 200 150 20]); %[left bottom width height]
+set(hpush_start,'String','Start Saving STREAM I/O of DriveBay');
+set(hpush_start,'Callback','gui.start_proc=1;');
+
+% Stop button
+hpush_stop = uicontrol(hfig,'Style','pushbutton');
+set(hpush_stop,'Position',[20 150 150 20]); %[left bottom width height]
+set(hpush_stop,'String','Stop Saving STREAM I/O of DriveBay');
+set(hpush_stop,'Callback','gui.stop_proc=1;');
+set(hpush_stop,'Enable','off');
+
+
+while (gui.start_proc == 0)
+    drawnow
+    %    disp('waiting to start')
+end
+set(hpush_start,'Enable','off');
+set(hpush_stop,'Enable','on');
+
+% Get synchronous Record
+sm.x = 0;   sm.y = 0;   sm.z = 0; sm.a = 0;   sm.e = 0;  sm.r = 0;
+sm.time = 0;  sm.quality = 0;
+Record  = libstruct('tagDOUBLE_POSITION_ANGLES_TIME_Q_RECORD', sm);  
+pRecord = libpointer('tagDOUBLE_POSITION_ANGLES_TIME_Q_RECORD', Record);
+
+%########################################################################
+Record1  = libstruct('tagDOUBLE_POSITION_ANGLES_TIME_Q_RECORD', sm);  
+pRecord1 = libpointer('tagDOUBLE_POSITION_ANGLES_TIME_Q_RECORD', Record1);
+
+Record2  = libstruct('tagDOUBLE_POSITION_ANGLES_TIME_Q_RECORD', sm);  
+pRecord2 = libpointer('tagDOUBLE_POSITION_ANGLES_TIME_Q_RECORD', Record2);
+
+Record3  = libstruct('tagDOUBLE_POSITION_ANGLES_TIME_Q_RECORD', sm);  
+pRecord3 = libpointer('tagDOUBLE_POSITION_ANGLES_TIME_Q_RECORD', Record3);
+
+Record4  = libstruct('tagDOUBLE_POSITION_ANGLES_TIME_Q_RECORD', sm);  
+pRecord4 = libpointer('tagDOUBLE_POSITION_ANGLES_TIME_Q_RECORD', Record4);
+%########################################################################
+
+Counter   = 0;
+senSorPre = [1 1 1 1];
+NumSenPres = sum(SensorNumAttached);
+
+
+while (gui.stop_proc == 0 )
+    clc
+    for count = 1:4
+        Counter = Counter + 1;
+    % Get synchronous Record
+    Error   = calllib('ATC3DG', 'GetAsynchronousRecord',  0, Record1, 64);
+    errorHandler(Error);
+    
+    Error   = calllib('ATC3DG', 'GetAsynchronousRecord',  1, Record2, 64);
+    errorHandler(Error);
+   
+    Error   = calllib('ATC3DG', 'GetAsynchronousRecord',  2, Record3, 64);
+    errorHandler(Error);
+   
+    Error   = calllib('ATC3DG', 'GetAsynchronousRecord',  3, Record4, 64);
+    errorHandler(Error);
+
+%########################################################################## 
+                if(count == 1)
+                    Pos(Counter, 1, count)   = Record1.x;
+                    Pos(Counter, 2, count)   = Record1.y;
+                    Pos(Counter, 3, count)   = Record1.z;
+                    Ang(Counter, 1, count)   = Record1.a;
+                    Ang(Counter, 2, count)   = Record1.e;
+                    Ang(Counter, 3, count)   = Record1.r;   
+                    Quality(Counter, 1, count)   = Record1.quality; 
+                end
+                if(count == 2)
+                    Pos(Counter, 1, count)   = Record2.x;
+                    Pos(Counter, 2, count)   = Record2.y;
+                    Pos(Counter, 3, count)   = Record2.z;
+                    Ang(Counter, 1, count)   = Record2.a;
+                    Ang(Counter, 2, count)   = Record2.e;
+                    Ang(Counter, 3, count)   = Record2.r;   
+                    Quality(Counter, 1, count)   = Record2.quality; 
+                end
+                if(count == 3)
+                    Pos(Counter, 1, count)   = Record3.x;
+                    Pos(Counter, 2, count)   = Record3.y;
+                    Pos(Counter, 3, count)   = Record3.z;
+                    Ang(Counter, 1, count)   = Record3.a;
+                    Ang(Counter, 2, count)   = Record3.e;
+                    Ang(Counter, 3, count)   = Record3.r;   
+                    Quality(Counter, 1, count)   = Record3.quality; 
+                end
+                if(count == 4)
+                    Pos(Counter, 1, count)   = Record4.x;
+                    Pos(Counter, 2, count)   = Record4.y;
+                    Pos(Counter, 3, count)   = Record4.z;
+                    Ang(Counter, 1, count)   = Record4.a;
+                    Ang(Counter, 2, count)   = Record4.e;
+                    Ang(Counter, 3, count)   = Record4.r;   
+                    Quality(Counter, 1, count)   = Record4.quality; 
+                end
+                
+                
+                
+                if (OptDispl==1)
+                    display(sprintf('\nSensor number %g position in inches: ',...
+                            count))
+                    disp([Pos(Counter, 1, count) Pos(Counter, 2, count)...
+                          Pos(Counter, 3, count)])
+                end
+                drawnow  % forces Matlab to evaluate Callback in figure
+%         else
+%                 senSorPre(count) = 0;
+%         end
+    end
+    TimStam(Counter/4)  = Record.time;
+end
+indsenSorPre =  find(senSorPre == 1);
+
+
+set(hpush_stop,'Enable','off'); % show that button has been pressed
+close(hfig)
+clear hfig;
+
+% Force the DriveBay system to come out of STREAM mode by Issuing the 
+% command GetSensorStatus
+for count = 1:4
+    if SensorNumAttached(count)
+        Error1 = calllib('ATC3DG', 'GetSensorStatus', count - 1);
+        errorHandler(Error1);
+    end
+end
+
+drawnow;
+
+
+
+

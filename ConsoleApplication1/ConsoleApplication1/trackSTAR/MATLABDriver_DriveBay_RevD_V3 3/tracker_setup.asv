@@ -1,0 +1,315 @@
+function tracker_setup;
+
+% tracker_setup: sets up tracker system for data acquisition.  This include: 
+% load library, initialize the tracker, etc..
+% Ascension Technology Corporation 
+
+
+
+global SensorNumAttached; % number of attached sensors
+global measurementRate; % measurement rate
+global numBoards;
+disp('Initialization in progress; please wait a moment...')
+
+% Free memory
+clear Record;
+clear pRecord;
+% Check if library is loaded
+if libisloaded('ATC3DG')
+%     unloadlibrary ATC3DG;
+end
+
+% Loading the ATC3DG library
+[notfound,warnings]=loadlibrary('ATC3DG', 'ATC3DG.h');
+
+% Check if loading library is successful
+CheckLibrary = libisloaded('ATC3DG');
+if not(CheckLibrary)
+    error('Problem load library: loadlibrary');
+    clear all;
+end
+
+% Initialize the system
+temp  = calllib('ATC3DG', 'InitializeBIRDSystem');
+errorHandler(temp);
+% Get system configuration
+Record3         = libstruct('tagSYSTEM_CONFIGURATION'); 
+Record3.agcMode = 0;
+pRecord3        = libpointer('tagSYSTEM_CONFIGURATION', Record3);
+temp3           = calllib('ATC3DG', 'GetBIRDSystemConfiguration', pRecord3);
+errorHandler(temp3)
+measurementRate = Record3.measurementRate;
+
+numBoards       = Record3.numberBoards;
+
+% Get sensor configuration
+if numBoards == 1
+    Records0        = libstruct('tagSENSOR_CONFIGURATION'); 
+    Records0.type   = 11;
+    pRecords0       = libpointer('tagSENSOR_CONFIGURATION', Records0);
+    temps0          = calllib('ATC3DG', 'GetSensorConfiguration', 0, pRecords0);
+    errorHandler(temps0);
+
+    Records1        = libstruct('tagSENSOR_CONFIGURATION'); 
+    Records1.type   = 11;
+    pRecords1       = libpointer('tagSENSOR_CONFIGURATION', Records1);
+    temps1          = calllib('ATC3DG', 'GetSensorConfiguration', 1, pRecords1);
+    errorHandler(temps1);
+
+    Records2        = libstruct('tagSENSOR_CONFIGURATION'); 
+    Records2.type   = 11;
+    pRecords2       = libpointer('tagSENSOR_CONFIGURATION', Records2);
+    temps2          = calllib('ATC3DG', 'GetSensorConfiguration', 2, pRecords2);
+    errorHandler(temps2);
+
+    Records3        = libstruct('tagSENSOR_CONFIGURATION'); 
+    Records3.type   = 11;
+    pRecords3       = libpointer('tagSENSOR_CONFIGURATION', Records3);
+    temps3          = calllib('ATC3DG', 'GetSensorConfiguration', 3, pRecords3);
+    errorHandler(temps3);
+    
+elseif numBoards == 2
+    Records0        = libstruct('tagSENSOR_CONFIGURATION'); 
+    Records0.type   = 11;
+    pRecords0       = libpointer('tagSENSOR_CONFIGURATION', Records0);
+    temps0          = calllib('ATC3DG', 'GetSensorConfiguration', 0, pRecords0);
+    errorHandler(temps0);
+
+    Records1        = libstruct('tagSENSOR_CONFIGURATION'); 
+    Records1.type   = 11;
+    pRecords1       = libpointer('tagSENSOR_CONFIGURATION', Records1);
+    temps1          = calllib('ATC3DG', 'GetSensorConfiguration', 1, pRecords1);
+    errorHandler(temps1);
+
+    Records2        = libstruct('tagSENSOR_CONFIGURATION'); 
+    Records2.type   = 11;
+    pRecords2       = libpointer('tagSENSOR_CONFIGURATION', Records2);
+    temps2          = calllib('ATC3DG', 'GetSensorConfiguration', 2, pRecords2);
+    errorHandler(temps2);
+
+    Records3        = libstruct('tagSENSOR_CONFIGURATION'); 
+    Records3.type   = 11;
+    pRecords3       = libpointer('tagSENSOR_CONFIGURATION', Records3);
+    temps3          = calllib('ATC3DG', 'GetSensorConfiguration', 3, pRecords3);
+    errorHandler(temps3);
+
+    Records4        = libstruct('tagSENSOR_CONFIGURATION'); 
+    Records4.type   = 11;
+    pRecords4       = libpointer('tagSENSOR_CONFIGURATION', Records4);
+    temps4          = calllib('ATC3DG', 'GetSensorConfiguration', 4, pRecords4);
+    errorHandler(temps4);
+
+    Records5        = libstruct('tagSENSOR_CONFIGURATION'); 
+    Records5.type   = 11;
+    pRecords5       = libpointer('tagSENSOR_CONFIGURATION', Records5);
+    temps5          = calllib('ATC3DG', 'GetSensorConfiguration', 5, pRecords5);
+    errorHandler(temps5);
+
+    Records6        = libstruct('tagSENSOR_CONFIGURATION'); 
+    Records6.type   = 11;
+    pRecords6       = libpointer('tagSENSOR_CONFIGURATION', Records6);
+    temps6          = calllib('ATC3DG', 'GetSensorConfiguration', 6, pRecords6);
+    errorHandler(temps6);
+
+    Records7        = libstruct('tagSENSOR_CONFIGURATION'); 
+    Records7.type   = 11;
+    pRecords7       = libpointer('tagSENSOR_CONFIGURATION', Records7);
+    temps7          = calllib('ATC3DG', 'GetSensorConfiguration', 7, pRecords7);
+    errorHandler(temps7);
+    
+elseif numBoards == 3
+    Records0        = libstruct('tagSENSOR_CONFIGURATION'); 
+    Records0.type   = 11;
+    pRecords0       = libpointer('tagSENSOR_CONFIGURATION', Records0);
+    temps0          = calllib('ATC3DG', 'GetSensorConfiguration', 0, pRecords0);
+    errorHandler(temps0);
+
+    Records1        = libstruct('tagSENSOR_CONFIGURATION'); 
+    Records1.type   = 11;
+    pRecords1       = libpointer('tagSENSOR_CONFIGURATION', Records1);
+    temps1          = calllib('ATC3DG', 'GetSensorConfiguration', 1, pRecords1);
+    errorHandler(temps1);
+
+    Records2        = libstruct('tagSENSOR_CONFIGURATION'); 
+    Records2.type   = 11;
+    pRecords2       = libpointer('tagSENSOR_CONFIGURATION', Records2);
+    temps2          = calllib('ATC3DG', 'GetSensorConfiguration', 2, pRecords2);
+    errorHandler(temps2);
+
+    Records3        = libstruct('tagSENSOR_CONFIGURATION'); 
+    Records3.type   = 11;
+    pRecords3       = libpointer('tagSENSOR_CONFIGURATION', Records3);
+    temps3          = calllib('ATC3DG', 'GetSensorConfiguration', 3, pRecords3);
+    errorHandler(temps3);
+
+    Records4        = libstruct('tagSENSOR_CONFIGURATION'); 
+    Records4.type   = 11;
+    pRecords4       = libpointer('tagSENSOR_CONFIGURATION', Records4);
+    temps4          = calllib('ATC3DG', 'GetSensorConfiguration', 4, pRecords4);
+    errorHandler(temps4);
+
+    Records5        = libstruct('tagSENSOR_CONFIGURATION'); 
+    Records5.type   = 11;
+    pRecords5       = libpointer('tagSENSOR_CONFIGURATION', Records5);
+    temps5          = calllib('ATC3DG', 'GetSensorConfiguration', 5, pRecords5);
+    errorHandler(temps5);
+
+    Records6        = libstruct('tagSENSOR_CONFIGURATION'); 
+    Records6.type   = 11;
+    pRecords6       = libpointer('tagSENSOR_CONFIGURATION', Records6);
+    temps6          = calllib('ATC3DG', 'GetSensorConfiguration', 6, pRecords6);
+    errorHandler(temps6);
+
+    Records7        = libstruct('tagSENSOR_CONFIGURATION'); 
+    Records7.type   = 11;
+    pRecords7       = libpointer('tagSENSOR_CONFIGURATION', Records7);
+    temps7          = calllib('ATC3DG', 'GetSensorConfiguration', 7, pRecords7);
+    errorHandler(temps7);
+
+    Records8        = libstruct('tagSENSOR_CONFIGURATION'); 
+    Records8.type   = 11;
+    pRecords8       = libpointer('tagSENSOR_CONFIGURATION', Records8);
+    temps8          = calllib('ATC3DG', 'GetSensorConfiguration', 8, pRecords8);
+    errorHandler(temps8);
+
+    Records9        = libstruct('tagSENSOR_CONFIGURATION'); 
+    Records9.type   = 11;
+    pRecords9       = libpointer('tagSENSOR_CONFIGURATION', Records9);
+    temps9          = calllib('ATC3DG', 'GetSensorConfiguration', 9, pRecords9);
+    errorHandler(temps9);
+
+    Records10        = libstruct('tagSENSOR_CONFIGURATION'); 
+    Records10.type   = 11;
+    pRecords10       = libpointer('tagSENSOR_CONFIGURATION', Records10);
+    temps10          = calllib('ATC3DG', 'GetSensorConfiguration', 10, pRecords10);
+    errorHandler(temps10);
+
+    Records11        = libstruct('tagSENSOR_CONFIGURATION'); 
+    Records11.type   = 11;
+    pRecords11       = libpointer('tagSENSOR_CONFIGURATION', Records11);
+    temps11          = calllib('ATC3DG', 'GetSensorConfiguration', 11, pRecords11);
+    errorHandler(temps11);
+
+else
+        Records0        = libstruct('tagSENSOR_CONFIGURATION'); 
+    Records0.type   = 11;
+    pRecords0       = libpointer('tagSENSOR_CONFIGURATION', Records0);
+    temps0          = calllib('ATC3DG', 'GetSensorConfiguration', 0, pRecords0);
+    errorHandler(temps0);
+
+    Records1        = libstruct('tagSENSOR_CONFIGURATION'); 
+    Records1.type   = 11;
+    pRecords1       = libpointer('tagSENSOR_CONFIGURATION', Records1);
+    temps1          = calllib('ATC3DG', 'GetSensorConfiguration', 1, pRecords1);
+    errorHandler(temps1);
+
+    Records2        = libstruct('tagSENSOR_CONFIGURATION'); 
+    Records2.type   = 11;
+    pRecords2       = libpointer('tagSENSOR_CONFIGURATION', Records2);
+    temps2          = calllib('ATC3DG', 'GetSensorConfiguration', 2, pRecords2);
+    errorHandler(temps2);
+
+    Records3        = libstruct('tagSENSOR_CONFIGURATION'); 
+    Records3.type   = 11;
+    pRecords3       = libpointer('tagSENSOR_CONFIGURATION', Records3);
+    temps3          = calllib('ATC3DG', 'GetSensorConfiguration', 3, pRecords3);
+    errorHandler(temps3);
+
+    Records4        = libstruct('tagSENSOR_CONFIGURATION'); 
+    Records4.type   = 11;
+    pRecords4       = libpointer('tagSENSOR_CONFIGURATION', Records4);
+    temps4          = calllib('ATC3DG', 'GetSensorConfiguration', 4, pRecords4);
+    errorHandler(temps4);
+
+    Records5        = libstruct('tagSENSOR_CONFIGURATION'); 
+    Records5.type   = 11;
+    pRecords5       = libpointer('tagSENSOR_CONFIGURATION', Records5);
+    temps5          = calllib('ATC3DG', 'GetSensorConfiguration', 5, pRecords5);
+    errorHandler(temps5);
+
+    Records6        = libstruct('tagSENSOR_CONFIGURATION'); 
+    Records6.type   = 11;
+    pRecords6       = libpointer('tagSENSOR_CONFIGURATION', Records6);
+    temps6          = calllib('ATC3DG', 'GetSensorConfiguration', 6, pRecords6);
+    errorHandler(temps6);
+
+    Records7        = libstruct('tagSENSOR_CONFIGURATION'); 
+    Records7.type   = 11;
+    pRecords7       = libpointer('tagSENSOR_CONFIGURATION', Records7);
+    temps7          = calllib('ATC3DG', 'GetSensorConfiguration', 7, pRecords7);
+    errorHandler(temps7);
+
+    Records8        = libstruct('tagSENSOR_CONFIGURATION'); 
+    Records8.type   = 11;
+    pRecords8       = libpointer('tagSENSOR_CONFIGURATION', Records8);
+    temps8          = calllib('ATC3DG', 'GetSensorConfiguration', 8, pRecords8);
+    errorHandler(temps8);
+
+    Records9        = libstruct('tagSENSOR_CONFIGURATION'); 
+    Records9.type   = 11;
+    pRecords9       = libpointer('tagSENSOR_CONFIGURATION', Records9);
+    temps9          = calllib('ATC3DG', 'GetSensorConfiguration', 9, pRecords9);
+    errorHandler(temps9);
+
+    Records10        = libstruct('tagSENSOR_CONFIGURATION'); 
+    Records10.type   = 11;
+    pRecords10       = libpointer('tagSENSOR_CONFIGURATION', Records10);
+    temps10          = calllib('ATC3DG', 'GetSensorConfiguration', 10, pRecords10);
+    errorHandler(temps10);
+
+    Records11        = libstruct('tagSENSOR_CONFIGURATION'); 
+    Records11.type   = 11;
+    pRecords11       = libpointer('tagSENSOR_CONFIGURATION', Records11);
+    temps11          = calllib('ATC3DG', 'GetSensorConfiguration', 11, pRecords11);
+    errorHandler(temps11);
+    
+    Records12        = libstruct('tagSENSOR_CONFIGURATION'); 
+    Records12.type   = 12;
+    pRecords12       = libpointer('tagSENSOR_CONFIGURATION', Records12);
+    temps12          = calllib('ATC3DG', 'GetSensorConfiguration', 11, pRecords12);
+    errorHandler(temps12);
+    
+    Records13        = libstruct('tagSENSOR_CONFIGURATION'); 
+    Records13.type   = 13;
+    pRecords13       = libpointer('tagSENSOR_CONFIGURATION', Records12);
+    temps12          = calllib('ATC3DG', 'GetSensorConfiguration', 11, pRecords12);
+    errorHandler(temps12);    
+    
+    
+% Record attached sensor number
+SensorNumAttached  = [Records0.attached Records1.attached Records2.attached ...
+                      Records3.attached Records4.attached Records5.attached ...
+                      Records6.attached Records7.attached Records8.attached ...
+                      Records9.attached Records10.attached Records11.attached];
+
+% Turn ON Transmitter
+tempSetP    = calllib('ATC3DG', 'SetSystemParameter', 0, 0, 2);
+errorHandler(tempSetP);
+
+% Set sensor parameters
+var       = int32(26);%(19);
+
+for count = 0:11
+    Error1 = calllib('ATC3DG', 'SetSensorParameter', count, 0, var, 4);
+    errorHandler(Error1);
+end
+
+
+if (temp == 0)
+    disp('System initialized: Done')
+else
+    error('Problem initialising the system: InitializeBIRDSystem');
+end
+
+
+% Free memory
+clear Record3;
+clear pRecord3;
+clear Records0;
+clear pRecords0;
+clear Records1;
+clear pRecords1;
+clear Records2;
+clear pRecords2;
+clear Records3;
+clear pRecords3;

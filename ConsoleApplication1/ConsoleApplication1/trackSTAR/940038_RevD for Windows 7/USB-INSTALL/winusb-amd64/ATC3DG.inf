@@ -1,0 +1,92 @@
+ [Version]
+Signature = "$Windows NT$"
+Class = USB
+ClassGUID={36FC9E60-C465-11CF-8056-444553540000}
+Provider = %PROVIDERNAME%
+DriverVer= 06/01/2009,1.0.0
+
+; ========== Manufacturer/Models sections ===========
+
+[Manufacturer]
+%MFGNAME% = WinUSB,NTamd64
+
+[WinUSB.NTamd64]
+%VID_04B4&PID_1003.DeviceDesc%=USB_Install, USB\VID_04B4&PID_1003
+%VID_04B4&PID_1004.DeviceDesc%=USB_Install, USB\VID_04B4&PID_1004
+%VID_04B4&PID_1005.DeviceDesc%=USB_Install, USB\VID_04B4&PID_1005
+
+
+; =================== Installation ===================
+
+;[0]
+[ClassInstall32]
+
+
+;[1]
+[USB_Install]
+Include=winusb.inf
+Needs=WINUSB.NT
+
+;[2]
+[USB_Install.Services]
+Include=winusb.inf
+AddService=WinUSB,0x00000002,WinUSB_ServiceInstall
+
+;[3]
+[WinUSB_ServiceInstall]
+ServiceType     = 1
+StartType       = 3
+ErrorControl    = 1
+ServiceBinary   = %12%\winUSB.sys
+
+;[4]
+[USB_Install.Wdf]
+KmdfService=WINUSB, WinUsb_Install
+
+[WinUsb_Install]
+KmdfLibraryVersion=1.5
+
+;[5]
+[USB_Install.HW]
+AddReg=Dev_AddReg
+
+[Dev_AddReg]
+HKR,,DeviceInterfaceGUIDs,0x10000,"{b35924d6-3e16-4a9e-9782-5524a4b79bac}"
+HKLM,SYSTEM\CurrentControlSet\Control\UsbFlags,IgnoreHWSerNum04B41003,1,1
+HKLM,SYSTEM\CurrentControlSet\Control\UsbFlags,IgnoreHWSerNum04B41004,1,1
+HKLM,SYSTEM\CurrentControlSet\Control\UsbFlags,IgnoreHWSerNum04B41005,1,1
+
+;[6]
+[USB_Install.CoInstallers]
+AddReg=CoInstallers_AddReg
+CopyFiles=CoInstallers_CopyFiles
+
+[CoInstallers_AddReg]
+HKR,,CoInstallers32,0x00010000,"WdfCoInstaller01007.dll,WdfCoInstaller","WinUSBCoInstaller.dll"
+
+[CoInstallers_CopyFiles]
+WinUSBCoInstaller.dll
+WdfCoInstaller01007.dll
+
+[DestinationDirs]
+CoInstallers_CopyFiles=11
+
+; ================= Source Media Section =====================
+;[7]
+[SourceDisksNames]
+1 = %DISKNAME%,,,\
+
+[SourceDisksFiles.amd6]
+WinUSBCoInstaller.dll=1
+WdfCoInstaller01007.dll=1
+
+; =================== Strings ===================
+
+[Strings]
+PROVIDERNAME="Ascension"
+MFGNAME="Microsoft"
+DISKNAME="Ascension USB Driver Installation Disk for 3D Guidance Tracking Device"
+VID_04B4&PID_1003.DeviceDesc="Ascension USB Device for 3D Guidance driveBAY (WinUSB)"
+VID_04B4&PID_1004.DeviceDesc="Ascension USB Device for 3D Guidance medSAFE (WinUSB)"
+VID_04B4&PID_1005.DeviceDesc="Ascension USB Device for 3D Guidance trakSTAR (WinUSB)"
+

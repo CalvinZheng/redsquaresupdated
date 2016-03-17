@@ -1,0 +1,107 @@
+function DriveBay_setup;
+
+% DriveBay_setup: load ATC3DG.lib file, i sets up DriveBay for data acquisition
+% Ascension Technology Corporation 
+
+
+
+global SensorNumAttached;
+global measurementRate;
+
+disp('Initialization in progress; please wait a moment...')
+
+% Free memory
+clear Record;
+clear pRecord;
+% Check if library is loaded
+if libisloaded('ATC3DG')
+    unloadlibrary ATC3DG;
+end
+
+% Loading the ATC3DG library
+[notfound,warnings]=loadlibrary('ATC3DG', 'ATC3DG.h');
+
+% Check if loading library is successful
+CheckLibrary = libisloaded('ATC3DG');
+if not(CheckLibrary)
+    error('Problem load library: loadlibrary');
+    clear all;
+end
+
+% Initialize the system
+temp  = calllib('ATC3DG', 'InitializeBIRDSystem');
+% Get system configuration
+Record3         = libstruct('tagSYSTEM_CONFIGURATION'); 
+Record3.agcMode = 0;
+pRecord3        = libpointer('tagSYSTEM_CONFIGURATION', Record3);
+temp3           = calllib('ATC3DG', 'GetBIRDSystemConfiguration', pRecord3);
+measurementRate = Record3.measurementRate;
+% Get sensor configuration
+Records0        = libstruct('tagSENSOR_CONFIGURATION'); 
+Records0.type   = 11;
+pRecords0       = libpointer('tagSENSOR_CONFIGURATION', Records0);
+temps0          = calllib('ATC3DG', 'GetSensorConfiguration', 0, pRecords0);
+
+Records1        = libstruct('tagSENSOR_CONFIGURATION'); 
+Records1.type   = 11;
+pRecords1       = libpointer('tagSENSOR_CONFIGURATION', Records1);
+temps1          = calllib('ATC3DG', 'GetSensorConfiguration', 1, pRecords1);
+
+Records2        = libstruct('tagSENSOR_CONFIGURATION'); 
+Records2.type   = 11;
+pRecords2       = libpointer('tagSENSOR_CONFIGURATION', Records2);
+temps2          = calllib('ATC3DG', 'GetSensorConfiguration', 2, pRecords2);
+
+Records3        = libstruct('tagSENSOR_CONFIGURATION'); 
+Records3.type   = 11;
+pRecords3       = libpointer('tagSENSOR_CONFIGURATION', Records3);
+temps3          = calllib('ATC3DG', 'GetSensorConfiguration', 3, pRecords3);
+
+if (temps0 || temps1 || temps2 || temps3)
+        [temps0 temps1 temps2 temps3]
+        error('Problem getting senssor onfiguration: GetSensorConfiguration');
+        clear all;
+end
+
+
+% Record attached sensor number
+SensorNumAttached  = [Records0.attached Records1.attached Records2.attached ...
+                      Records3.attached];
+
+% Turn ON Transmitter
+gg    = calllib('ATC3DG', 'SetSystemParameter', 0, 0, 2);
+if (gg ~= 0)
+    error('Problem setting the system parameter: SetSystemParameter');
+    clear all;
+end
+
+% Set sensor parameters
+var       = int32(26);%(19);
+pVar      = libpointer('int32',var);
+for count = 0:3
+    Error1 = calllib('ATC3DG', 'SetSensorParameter', count, 0, var, 4);
+    if Error1
+        error('Problem setting sensor parameter: SetSensorParameter');
+        clear all;
+    end
+end
+
+
+if (temp == 0)
+    disp('System initialized: Done')
+else
+    error('Problem initialising the system: InitializeBIRDSystem');
+end
+
+% Free memory
+clear Record3;
+clear pRecord3;
+clear Records0;
+clear pRecords0;
+clear Records1;
+clear pRecords1;
+clear Records2;
+clear pRecords2;
+clear Records3;
+clear pRecords3;
+clear pVar;
