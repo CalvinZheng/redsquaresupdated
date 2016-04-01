@@ -71,7 +71,7 @@ string fileOutput;
 #define TIME_BETWEEN_CASES				1		//60=>1s // 120 => 1s
 #define OCLUDE_COS_THRESH				0.9999
 
-double EYE_OFFSET = 15;
+double EYE_OFFSET = 11;
 
 float randomChoiceTimer = 0;
 double averageReds[2], peakReds[2], averageRedsCounter[2];
