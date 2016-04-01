@@ -46,3 +46,9 @@ Network Trash Folder
 Temporary Items
 .apdisk
 ConsoleApplication1.zip
+ConsoleApplication1/Release/ClutteredSquares.exe
+ConsoleApplication1/Release/ClutteredSquares.pdb
+ConsoleApplication1/Release/ClutteredSquares.iobj
+ConsoleApplication1/Release/ClutteredSquares.ipdb
+ConsoleApplication1/ConsoleApplication1/log*.txt
+ConsoleApplication1/ConsoleApplication1/Release/ConsoleApplication1.log
