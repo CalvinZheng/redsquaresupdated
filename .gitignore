@@ -56,9 +56,6 @@ ConsoleApplication1/ConsoleApplication1.opensdf
 ConsoleApplication1/ConsoleApplication1.sdf
 ConsoleApplication1/ConsoleApplication1/thresholds*.csv
 ConsoleApplication1/ConsoleApplication1/tracking_log.txt
-ConsoleApplication1/ConsoleApplication1/Release/ClutteredSquares.tlog
-ConsoleApplication1/ConsoleApplication1/Release/ConsoleApplication1.log
-ConsoleApplication1/ConsoleApplication1/Release/Sample2.obj
-ConsoleApplication1/ConsoleApplication1/Release/vc140.pdb
-ConsoleApplication1/ConsoleApplication1/Release/ClutteredSquares.Build.CppClean.log
+ConsoleApplication1/ConsoleApplication1/Release
+ConsoleApplication1/ConsoleApplication1/Debug
 ConsoleApplication1/.vs
