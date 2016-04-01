@@ -1,6 +1,0 @@
-Staircase: 0 numReversals: 0 BP: 0 Stereo: 1 Tracking: 1 HeadMotion: 0 Density: 11 depthDiff (dist): 7 dZ: 0.5 result: 0 p[0].x= 30 p[1].x= -29 p[0].z= -60.5 p[1].z= -53.5 alpha 0 key=22
-Staircase: 0 numReversals: 0 BP: 0 Stereo: 1 Tracking: 1 HeadMotion: 0 Density: 11 depthDiff (dist): 15.3367 dZ: 0.5 result: 0 p[0].x= 39 p[1].x= -43 p[0].z= -68.6683 p[1].z= -53.3317 alpha 0 key=22
-Staircase: 0 numReversals: 0 BP: 0 Stereo: 1 Tracking: 1 HeadMotion: 0 Density: 11 depthDiff (dist): 33.6019 dZ: 0.5 result: 0 p[0].x= 16 p[1].x= -22 p[0].z= -90.8009 p[1].z= -57.1991 alpha 0 key=22
-Staircase: 0 numReversals: 0 BP: 0 Stereo: 1 Tracking: 1 HeadMotion: 0 Density: 11 depthDiff (dist): 73.6201 dZ: 0.5 result: 0 p[0].x= 41 p[1].x= -26 p[0].z= -140.81 p[1].z= -67.19 alpha 0 key=22
-
- total number of trials: 4

@@ -1,7 +1,0 @@
-Staircase: 0 numReversals: 0 BP: 0 Stereo: 1 Tracking: 1 HeadMotion: 0 Density: 11 depthDiff (dist): 7 dZ: 0.5 result: 1 p[0].x= 40 p[1].x= -32 p[0].z= -63.5 p[1].z= -70.5 alpha 1 key=22
-Staircase: 0 numReversals: 1 BP: 0 Stereo: 1 Tracking: 1 HeadMotion: 0 Density: 11 depthDiff (dist): 5.6 dZ: 0.5 result: 0 p[0].x= 29 p[1].x= -25 p[0].z= -85.8 p[1].z= -80.2 alpha 1 key=22
-Staircase: 0 numReversals: 2 BP: 0 Stereo: 1 Tracking: 1 HeadMotion: 0 Density: 11 depthDiff (dist): 12.2693 dZ: 0.5 result: 1 p[0].x= 40 p[1].x= -35 p[0].z= -47.8653 p[1].z= -60.1347 alpha 1 key=22
-StairCase 0 : NumResults: 2 result: 8.93466
-		numReversals: 2 5.6 12.2693 last 2 : 2.11493
-
- total number of trials: 3

@@ -1,1 +1,0 @@
-Staircase: 2 numReversals: 0 BP: 0 Trans: 1 Stereo: 1 Tracking: 0 HeadMotion: 0 Density: 15 blueGreenZ: 14 dZ: 5 result: 0 p[0].x= 43 p[1].x= -36 p[0].z= -232.223 p[1].z= -220.771 alpha 0.5 key=22
