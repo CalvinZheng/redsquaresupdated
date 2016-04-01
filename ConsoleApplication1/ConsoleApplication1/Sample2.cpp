@@ -71,7 +71,7 @@ string fileOutput;
 #define TIME_BETWEEN_CASES				1		//60=>1s // 120 => 1s
 #define OCLUDE_COS_THRESH				0.9999
 
-double EYE_OFFSET = 11;
+double EYE_OFFSET = 15;
 
 float randomChoiceTimer = 0;
 double averageReds[2], peakReds[2], averageRedsCounter[2];
@@ -228,8 +228,8 @@ Square3D surf[MAX_DENSITY*MAX_DENSITY];
 Square3D p[MAXNUMSQUARES];
 
 //reserved for shuffling and re-sorting experiment blocks
-std::array<int,9> foo = {1,2,3,4,5,6,7,8,9};
-std::array<array<double,2>,9> thresholdResults;			
+std::array<int, 1> foo = { 1 };//, 2, 3, 4, 5, 6, 7, 8, 9};
+std::array<array<double,2>,1> thresholdResults;			
 bool myFunc(array<double,2> a, array<double,2> b)
 	{ return a[0]<b[0];}
 
@@ -819,7 +819,7 @@ double ny = 0.0; // = 1/2.0;
 double nz = 1.0; //  = sqrt(3.0)/2;
 
 
-void drawBlurredSquare(GLfloat x, GLfloat y, GLfloat z, int rotX, int rotZ, GLfloat albedoR, GLfloat albedoG, GLfloat albedoB, GLfloat alpha, GLfloat size, GLfloat b, bool green, bool blue)
+void drawBlurredSquare(GLfloat x, GLfloat y, GLfloat z, int rotX, int rotZ, GLfloat albedoR, GLfloat albedoG, GLfloat albedoB, GLfloat alpha, GLfloat sizeX, GLfloat sizeY, GLfloat b, bool green, bool blue)
 //x y z are the coordinates of the center. The square is in the x-y plane.
 {//out<<z-zMid<<endl;
 	glDisable(GL_CULL_FACE);                           //   shows both sides of the texture
@@ -880,10 +880,10 @@ void drawBlurredSquare(GLfloat x, GLfloat y, GLfloat z, int rotX, int rotZ, GLfl
 		//glScaled(scaleForBlur, scaleForBlur, scaleForBlur);
 
 		glBegin(GL_QUADS);
-		glVertex3f(-size / 2, -size / 2, 0.0);
-		glVertex3f(-size / 2, +size / 2, 0.0);
-		glVertex3f(size / 2, size / 2, 0.0);
-		glVertex3f(size / 2, -size / 2, 0.0);
+		glVertex3f(-sizeX / 2, -sizeY / 2, 0.0);
+		glVertex3f(-sizeX / 2, +sizeY / 2, 0.0);
+		glVertex3f(sizeX / 2, sizeY / 2, 0.0);
+		glVertex3f(sizeX / 2, -sizeY / 2, 0.0);
 		glEnd();
 		glEnable(GL_TEXTURE_2D);
 
@@ -1021,14 +1021,14 @@ void drawSomeBlurredSquares(int view)
 			for (int i = 0; i < 2; i++)
 			{
 			
-				drawBlurredSquare(p[i].x, p[i].y, p[i].z, p[i].rotX, p[i].rotZ, p[i].albedoR / 255.0, p[i].albedoG / 255.0, p[i].albedoB / 255.0, p[i].alpha / 255.0, 12, b*toggleBlur, i == 0, i == 1);
+				drawBlurredSquare(p[i].x, p[i].y, p[i].z, p[i].rotX, p[i].rotZ, p[i].albedoR / 255.0, p[i].albedoG / 255.0, p[i].albedoB / 255.0, p[i].alpha / 255.0, 24, 12, b*toggleBlur, i == 0, i == 1);
 			
 			}
 			//render CLUTTER back to front
 			for (int i = 2; i < testCases[caseNumber].numSquares; i++)
 			{
 				
-				drawBlurredSquare(p[i].x, p[i].y, p[i].z, p[i].rotX, p[i].rotZ, p[i].albedoR / 255.0, p[i].albedoG / 255.0, p[i].albedoB / 255.0, p[i].alpha / 255.0, 12, b*toggleBlur, i == 0, i == 1);
+				drawBlurredSquare(p[i].x, p[i].y, p[i].z, p[i].rotX, p[i].rotZ, p[i].albedoR / 255.0, p[i].albedoG / 255.0, p[i].albedoB / 255.0, p[i].alpha / 255.0, 12, 12, b*toggleBlur, i == 0, i == 1);
 					
 			}
 			
@@ -1946,8 +1946,8 @@ void specialKeys(int key, int x, int y)
 						tunnel = 0;
 						alpha = 1;
 						
-						stereo=0;
-						headTracking=0;
+						stereo=1;
+						headTracking=1;
 						int type[3] = { stereo, headTracking, 0 };
 					fout2 << "T" << tunnel << "_D" << densities[d] << "_PL" << plc << "_a" << alpha << "_S" << stereo << "_HT" << headTracking << endl;
 					stairCases[count].initialize(sizes[s], alpha, tr, plc, type, densities[d], 0, 0, yRange / 6, 0, INIT_DEPTH_DIFFERENCE, 6, 0, 0, zClosest - zRange / 2);
