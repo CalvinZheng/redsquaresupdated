@@ -83,7 +83,7 @@ unsigned char *frameBuffer;
 double RANDOM_CHOICE_TIMER = 4 + TIME_BETWEEN_CASES; //3d frames (3s)	
 #define DIST_THRESH						25
 
-#define DEMO_MODE					0
+#define DEMO_MODE					1
 static bool paused = false;
 
 //#define IOD								65//64.7   70
@@ -126,7 +126,7 @@ double rotations[3] = { 10, 45, 90 };
 #define STEP_INITIAL 0.5 //5	
 #define EXIT_CONDITION 14 //10 //14	
 #define N_LAST_REVERSALS 6
-#define INIT_DEPTH_DIFFERENCE 7
+#define INIT_DEPTH_DIFFERENCE 12
 #define BLOCK_BEGINNING 1
 #define sizeRange 0.8
 #define DEPTH_WARP_INTENSITY 2
@@ -216,9 +216,9 @@ GLuint	texName, texture2;
 //   with z positive coming out of the screen.
 
 #define zClosest    30 //0       //   the screen is at z = 0  (-100 is behind the screen)
-#define xRange	    220 //250//200//400 //260     //500   [-xRange, xRange]
-#define yRange	    190 //220 //190 //170//250 //170     //300   [-yRange, yRange]
-#define zRange		225   //   Farthest z will be   zClosest - zRange   (could be myScreen.height)
+#define xRange	    200 //250//200//400 //260     //500   [-xRange, xRange]
+#define yRange	    200 //220 //190 //170//250 //170     //300   [-yRange, yRange]
+#define zRange		200   //   Farthest z will be   zClosest - zRange   (could be myScreen.height)
 #define zMid	   (zClosest - zRange/2)
 #define zFocalPlane  zMid  
 
@@ -593,11 +593,11 @@ void initializeScene(){
 
 		//		generate z values uniformly from far to near
 
-		jitter = ((rand() % 128) - 63.5) / 128;
-		p[i].x = (((i / density) % density) - (density / 2.0 - 0.5) + jitterscale*jitter)*  0.85*xRange / density;
-		jitter = ((rand() % 128) - 63.5) / 128;
-		p[i].y = ((i % density) - (density / 2.0 - 0.5) + jitterscale*jitter)* 0.85*yRange / density;
-		jitter = ((rand() % 128) - 63.5) / 128;
+		//jitter = ((rand() % 128) - 63.5) / 128;
+		//p[i].x = (((i / density) % density) - (density / 2.0 - 0.5) + jitterscale*jitter)*  0.85*xRange / density;
+		//jitter = ((rand() % 128) - 63.5) / 128;
+		//p[i].y = ((i % density) - (density / 2.0 - 0.5) + jitterscale*jitter)* 0.85*yRange / density;
+		//jitter = ((rand() % 128) - 63.5) / 128;
 		//cout<<p[i].x<<endl;
 
 		/*urand = ((double)rand() / (RAND_MAX));
@@ -635,6 +635,19 @@ void initializeScene(){
 			//p[i].z+=Zoffset;
 		}
 
+		p[i].x = (randNumber() * xRange - xRange / 2)*0.85;
+		p[i].y = (randNumber() * yRange - yRange / 2)*0.85;
+
+		float frontline = min(p[0].z, p[1].z);
+		float backline = max(p[0].z, p[1].z);
+		if (rand() % 2 == 0)
+		{
+			p[i].z = zMid + (randNumber() * zRange - zRange / 2);
+		}
+		else
+		{
+			p[i].z = zMid + (randNumber() * zRange - zRange / 2);
+		}
 		
 		//cout<<p[i].z<<endl;
 		GLubyte randGray;
@@ -695,7 +708,8 @@ void initializeScene(){
 		p[i].y = rotatedY + yRange / 8;
 		p[i].z = rotatedZ;
 		p[i].z += zMid;*/
-		p[i].rotX = rand() % 70;
+		p[i].rotX = rand() % 180;
+		p[i].rotY = rand() % 180;
 		p[i].rotZ = rand() % 180;
 		
 		/*if (pzMax<p[i].z && i<density*density*density)
@@ -819,7 +833,7 @@ double ny = 0.0; // = 1/2.0;
 double nz = 1.0; //  = sqrt(3.0)/2;
 
 
-void drawBlurredSquare(GLfloat x, GLfloat y, GLfloat z, int rotX, int rotZ, GLfloat albedoR, GLfloat albedoG, GLfloat albedoB, GLfloat alpha, GLfloat sizeX, GLfloat sizeY, GLfloat b, bool green, bool blue)
+void drawBlurredSquare(GLfloat x, GLfloat y, GLfloat z, int rotX, int rotY, int rotZ, GLfloat albedoR, GLfloat albedoG, GLfloat albedoB, GLfloat alpha, GLfloat sizeX, GLfloat sizeY, GLfloat b, bool green, bool blue)
 //x y z are the coordinates of the center. The square is in the x-y plane.
 {//out<<z-zMid<<endl;
 	glDisable(GL_CULL_FACE);                           //   shows both sides of the texture
@@ -840,6 +854,7 @@ void drawBlurredSquare(GLfloat x, GLfloat y, GLfloat z, int rotX, int rotZ, GLfl
 	{
 		glRotatef(rotZ, 0.0, 0.0, 1.0);
 		glRotatef(rotX, 1.0, 0.0, 0.0);
+		glRotatef(rotY, 0.0, 1.0, 0.0);
 	}
 	int  drawRedBand = 0;
 	/*if ((x*nx + y*ny + (z - zMid) *nz > 0) && (x*nx + y*ny + (z - zMid) *nz < 2*thickness)){
@@ -1021,14 +1036,14 @@ void drawSomeBlurredSquares(int view)
 			for (int i = 0; i < 2; i++)
 			{
 			
-				drawBlurredSquare(p[i].x, p[i].y, p[i].z, p[i].rotX, p[i].rotZ, p[i].albedoR / 255.0, p[i].albedoG / 255.0, p[i].albedoB / 255.0, p[i].alpha / 255.0, 24, 12, b*toggleBlur, i == 0, i == 1);
+				drawBlurredSquare(p[i].x, p[i].y, p[i].z, p[i].rotX, p[i].rotY, p[i].rotZ, p[i].albedoR / 255.0, p[i].albedoG / 255.0, p[i].albedoB / 255.0, p[i].alpha / 255.0, 24, 12, b*toggleBlur, i == 0, i == 1);
 			
 			}
 			//render CLUTTER back to front
 			for (int i = 2; i < testCases[caseNumber].numSquares; i++)
 			{
 				
-				drawBlurredSquare(p[i].x, p[i].y, p[i].z, p[i].rotX, p[i].rotZ, p[i].albedoR / 255.0, p[i].albedoG / 255.0, p[i].albedoB / 255.0, p[i].alpha / 255.0, 12, 12, b*toggleBlur, i == 0, i == 1);
+				drawBlurredSquare(p[i].x, p[i].y, p[i].z, p[i].rotX, p[i].rotY, p[i].rotZ, p[i].albedoR / 255.0, p[i].albedoG / 255.0, p[i].albedoB / 255.0, p[i].alpha / 255.0, 12, 12, b*toggleBlur, i == 0, i == 1);
 					
 			}
 			
@@ -1808,7 +1823,7 @@ void endExperiment(){
 			}
 			fout << " " << stairCases[i].reversalResults[j];
 		}
-		fout << " last " << count << " : " << lastReversals / count;
+		fout << " last " << count << " : " << exp(lastReversals / count);
 		thresholdResults[i][0] = foo[i];
 		thresholdResults[i][1] = exp(lastReversals / count);
 
@@ -1946,7 +1961,7 @@ void specialKeys(int key, int x, int y)
 						tunnel = 0;
 						alpha = 1;
 						
-						stereo=1;
+						stereo=0;
 						headTracking=1;
 						int type[3] = { stereo, headTracking, 0 };
 					fout2 << "T" << tunnel << "_D" << densities[d] << "_PL" << plc << "_a" << alpha << "_S" << stereo << "_HT" << headTracking << endl;
