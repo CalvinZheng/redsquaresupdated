@@ -116,9 +116,9 @@ double rotations[3] = { 10, 45, 90 };
 #define LINE_WIDTH						5.0
 //#define SLIDER_SENSITIVITY				2.2
 #define TRACKING_ACCEPTABLE_RANGE_X		300.0
-#define TRACKING_ACCEPTABLE_RANGE_Y		300.0
-#define TRACKING_CLOSE_Z				500 //300
-#define TRACKING_FAR_Z					800 //900
+#define TRACKING_ACCEPTABLE_RANGE_Y		0
+#define TRACKING_CLOSE_Z				600 //300
+#define TRACKING_FAR_Z					600 //900
 #define BEGINING_DELAY					60
 #define TILT_THRESH 1200	
 #define ROTATE_ALL_POINTS 0 //(-15*PI/180)	
@@ -1289,12 +1289,42 @@ void updateTrackerPosition()
 	viewer[1][1] = (record2.z - myScreen.position.y) / mmPerModelUnit;  //y
 	viewer[1][2] = (-record2.x - myScreen.position.z) / mmPerModelUnit;  //z
 
-	if (testCases[caseNumber].type[TYPE_TRACKER] == true && (viewer[0][0]<-TRACKING_ACCEPTABLE_RANGE_X / 2 || viewer[1][0]>TRACKING_ACCEPTABLE_RANGE_X / 2
-		|| viewer[0][1]<-TRACKING_ACCEPTABLE_RANGE_Y / 2 || viewer[1][1]>TRACKING_ACCEPTABLE_RANGE_Y / 2
-		|| viewer[0][2]<TRACKING_CLOSE_Z || viewer[1][2]>TRACKING_FAR_Z))
+	if (testCases[caseNumber].type[TYPE_TRACKER] == true)
 	{
-		tooFar = true;
-		disabled = true;
+		if (viewer[0][0] < -TRACKING_ACCEPTABLE_RANGE_X / 2)
+		{
+			tooFar = true;
+			viewer[1][0] += -TRACKING_ACCEPTABLE_RANGE_X / 2 - viewer[0][0];
+			viewer[0][0] += -TRACKING_ACCEPTABLE_RANGE_X / 2 - viewer[0][0];
+		}
+		if (viewer[1][0]>TRACKING_ACCEPTABLE_RANGE_X / 2)
+		{
+			tooFar = true;
+			viewer[0][0] -= viewer[1][0] - TRACKING_ACCEPTABLE_RANGE_X / 2;
+			viewer[1][0] -= viewer[1][0] - TRACKING_ACCEPTABLE_RANGE_X / 2;
+		}
+		if (viewer[0][1]<-TRACKING_ACCEPTABLE_RANGE_Y / 2)
+		{
+			viewer[1][1] += -TRACKING_ACCEPTABLE_RANGE_Y / 2 - viewer[0][1];
+			viewer[0][1] += -TRACKING_ACCEPTABLE_RANGE_Y / 2 - viewer[0][1];
+		}
+		if (viewer[1][1]>TRACKING_ACCEPTABLE_RANGE_Y / 2)
+		{
+			viewer[0][1] -= viewer[1][1] - TRACKING_ACCEPTABLE_RANGE_Y / 2;
+			viewer[1][1] -= viewer[1][1] - TRACKING_ACCEPTABLE_RANGE_Y / 2;
+		}
+		if (viewer[0][2]<TRACKING_CLOSE_Z)
+		{
+			viewer[1][2] += TRACKING_CLOSE_Z - viewer[0][2];
+			viewer[0][2] += TRACKING_CLOSE_Z - viewer[0][2];
+		}
+		if (viewer[1][2]>TRACKING_FAR_Z)
+		{
+			viewer[0][2] -= viewer[1][2] - TRACKING_FAR_Z;
+			viewer[1][2] -= viewer[1][2] - TRACKING_FAR_Z;
+		}
+
+		disabled = false;
 	}
 
 	if (pastviewers[nowPosViewer][0]<-9999)
@@ -1331,13 +1361,9 @@ void updateTrackerPosition()
 
 	if (testCases[caseNumber].type[TYPE_STEREO] == false)
 	{
-		viewer[0][0] = (record.y - myScreen.position.x) / mmPerModelUnit;  //x
-		viewer[0][1] = (record.z - myScreen.position.y) / mmPerModelUnit;  //y
-		viewer[0][2] = (-record.x - myScreen.position.z) / mmPerModelUnit;  //z
-
-		viewer[1][0] = (record.y - myScreen.position.x) / mmPerModelUnit;  //x
-		viewer[1][1] = (record.z - myScreen.position.y) / mmPerModelUnit;  //y
-		viewer[1][2] = (-record.x - myScreen.position.z) / mmPerModelUnit;  //z
+		viewer[0][0] = viewer[1][0] = (viewer[0][0] + viewer[1][0]) / 2;  //x
+		viewer[0][1] = viewer[1][1] = (viewer[0][1] + viewer[1][1]) / 2;  //y
+		viewer[0][2] = viewer[1][2] = (viewer[0][2] + viewer[1][2]) / 2;  //z
 	}
 
 	if (!rest)
@@ -1993,10 +2019,10 @@ void specialKeys(int key, int x, int y)
 					uneven = false;
 					longBar = false;
 
-					stereo = 1;
+					stereo = 0;
 					headTracking = 1;
 					int type[3] = { stereo, headTracking, 0 };
-					fout2 << "T" << tunnel << "_D" << densities[d] << "_PL" << plc << "_a" << alpha << "_S" << stereo << "_HT" << headTracking << "_hol" << endl;
+					fout2 << "T" << tunnel << "_D" << densities[d] << "_PL" << plc << "_a" << alpha << "_S" << stereo << "_HT" << headTracking << "_hol" << hollow << endl;
 					stairCases[count].initialize(sizes[s], alpha, tr, plc, hollow, uneven, longBar, type, densities[d], 0, 0, yRange / 6, 0, INIT_DEPTH_DIFFERENCE, 6, 0, 0, zClosest - zRange / 2);
 
 					stairCases[count].setStep(0, 0, STEP_INITIAL, 5, 0, 0, 0);//2
@@ -2016,10 +2042,10 @@ void specialKeys(int key, int x, int y)
 					uneven = false;
 					longBar = false;
 
-					stereo = 1;
+					stereo = 0;
 					headTracking = 1;
 					int type[3] = { stereo, headTracking, 0 };
-					fout2 << "T" << tunnel << "_D" << densities[d] << "_PL" << plc << "_a" << alpha << "_S" << stereo << "_HT" << headTracking << "_hol" << endl;
+					fout2 << "T" << tunnel << "_D" << densities[d] << "_PL" << plc << "_a" << alpha << "_S" << stereo << "_HT" << headTracking << "_hol" << hollow << endl;
 					stairCases[count].initialize(sizes[s], alpha, tr, plc, hollow, uneven, longBar, type, densities[d], 0, 0, yRange / 6, 0, INIT_DEPTH_DIFFERENCE, 6, 0, 0, zClosest - zRange / 2);
 
 					stairCases[count].setStep(0, 0, STEP_INITIAL, 5, 0, 0, 0);//2
