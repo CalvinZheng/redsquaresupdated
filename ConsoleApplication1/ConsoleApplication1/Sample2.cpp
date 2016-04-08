@@ -29,6 +29,7 @@
 #include <math.h> //by me
 #endif
 #include <math.h> //by me
+#include <assert.h> // Haomin
 #ifdef LINUX
 #include <unistd.h>
 #include <stdio.h>
@@ -83,7 +84,7 @@ unsigned char *frameBuffer;
 double RANDOM_CHOICE_TIMER = 4 + TIME_BETWEEN_CASES; //3d frames (3s)	
 #define DIST_THRESH						25
 
-#define DEMO_MODE					1
+#define DEMO_MODE					0
 static bool paused = false;
 
 //#define IOD								65//64.7   70
@@ -131,7 +132,7 @@ double rotations[3] = { 10, 45, 90 };
 #define sizeRange 0.8
 #define DEPTH_WARP_INTENSITY 2
 #define DEPTH_WARP_MID 1
-#define MAX_DEPTH_DIFF 100
+#define MAX_DEPTH_DIFF 220
 #define SCALE_FOR_LOG 0.8
 
 bool disabled, tooFar, tilted, not_moving, rest, randomChoiceFlag = false, answer = false;
@@ -174,6 +175,11 @@ double randNumber()
 	rd = drand48();
 #endif
 	return rd;
+}
+
+double randNumberRange(double low, double high)
+{
+	return low + randNumber() * (high - low);
 }
 
 int caseNumber = -1;
@@ -228,8 +234,8 @@ Square3D surf[MAX_DENSITY*MAX_DENSITY];
 Square3D p[MAXNUMSQUARES];
 
 //reserved for shuffling and re-sorting experiment blocks
-std::array<int, 1> foo = { 1 };//, 2, 3, 4, 5, 6, 7, 8, 9};
-std::array<array<double,2>,1> thresholdResults;			
+std::array<int, 2> foo = { 1, 2 };
+std::array<array<double,2>,2> thresholdResults;			
 bool myFunc(array<double,2> a, array<double,2> b)
 	{ return a[0]<b[0];}
 
@@ -261,12 +267,15 @@ public:
 	bool tunnel;
 	bool trans;
 	int plcov;
+	bool hollow;
+	bool uneven;
+	bool longBar;
 	int lastCaseNumber;
 	double initialD, initialX, initialY, initialZ, initialh, initialAvgX, initialAvgY, initialAvgZ;
 	double dX, dY, dZ, dh, dAvgX, dAvgY, dAvgZ;
 	double alpha, size;
 	int numReversals;
-	void initialize(double s, double al, bool tr, int plc, int t[3], double iD, bool tun, bool h, double iX, double iY, double iZ, double ih, double iAvgX, double iAvgY, double iAvgZ){
+	void initialize(double s, double al, bool tr, int plc, bool hollow, bool uneven, bool longBar, int t[3], double iD, bool tun, bool h, double iX, double iY, double iZ, double ih, double iAvgX, double iAvgY, double iAvgZ){
 		flag2down = false;
 		reducedStep = false;
 		sumResults = 0;
@@ -290,6 +299,9 @@ public:
 		initialAvgZ = iAvgZ;
 		trans = tr;
 		plcov = plc;
+		this->hollow = hollow;
+		this->uneven = uneven;
+		this->longBar = longBar;
 	}
 	void setStep(double x, double y, double z, double h, double avgX, double avgY, double avgZ){
 		dX = x;
@@ -585,8 +597,8 @@ void initializeScene(){
 
 	double jitter;
 	int density = testCases[caseNumber].density;
-	double Zoffset = rand() % (RANDOM_OFFSET * 4) - RANDOM_OFFSET * 2;
-	testCases[caseNumber].avgZ += Zoffset;
+	//double Zoffset = rand() % (RANDOM_OFFSET * 4) - RANDOM_OFFSET * 2;
+	//testCases[caseNumber].avgZ += Zoffset;
 	for (int i = 0; i<MAXNUMSQUARES; i++)	{
 
 		//   xyz positions are in mm,  not in model units
@@ -607,7 +619,7 @@ void initializeScene(){
 		
 		
 		
-		p[i].z = zMid + (i / (density*density) - density / 2.0 + jitterscale*jitter)*zRange / (density);
+		//p[i].z = zMid + (i / (density*density) - density / 2.0 + jitterscale*jitter)*zRange / (density);
 		//cout<<p[i].z<<endl;
 
 		//for 2 red squares
@@ -634,19 +646,31 @@ void initializeScene(){
 			p[i].y += testCases[caseNumber].offsetY[i];
 			//p[i].z+=Zoffset;
 		}
-
-		p[i].x = (randNumber() * xRange - xRange / 2)*0.85;
-		p[i].y = (randNumber() * yRange - yRange / 2)*0.85;
-
-		float frontline = min(p[0].z, p[1].z);
-		float backline = max(p[0].z, p[1].z);
-		if (rand() % 2 == 0)
-		{
-			p[i].z = zMid + (randNumber() * zRange - zRange / 2);
-		}
 		else
 		{
-			p[i].z = zMid + (randNumber() * zRange - zRange / 2);
+			// for other clutters
+			p[i].x = randNumberRange(-xRange / 2, xRange / 2)*0.85;
+			p[i].y = randNumberRange(-yRange / 2, yRange / 2)*0.85;
+
+			float frontline = min(p[0].z, p[1].z);
+			float backline = max(p[0].z, p[1].z);
+
+			if (stairCases[testCases[caseNumber].stairCase].hollow)
+			{
+				if (rand() % 2 == 0)
+				{
+					p[i].z = randNumberRange(zMid - zRange / 2, frontline);
+				}
+				else
+				{
+					p[i].z = randNumberRange(backline, zMid + zRange / 2);
+				}
+			}
+			else
+			{
+				p[i].z = zMid + randNumberRange(-zRange / 2, zRange / 2);
+			}
+
 		}
 		
 		//cout<<p[i].z<<endl;
@@ -1943,8 +1967,9 @@ void specialKeys(int key, int x, int y)
 			double opacities[] = { 0.1, 0.4, 1 };
 			int count = 0; //staircase count
 			int s = 0;//size index, deprecated
-			
-
+			bool hollow = false;	// if the clutter distribution is hollow, i.e. there is no squares drawn between red square on z axis.
+			bool uneven = false;	// if the density of the distribution is not constant
+			bool longBar = false;	// if the target is long bar
 
 			for (int& cond: foo){
 
@@ -1955,146 +1980,58 @@ void specialKeys(int key, int x, int y)
 				int stereo = 0, headTracking = 0;		
 				
 				// SELECT A CONDITION/STAIRCASE
-					if(cond == 1){//no cue, random
-						plc = 0;
-						d = 2;
-						tunnel = 0;
-						alpha = 1;
-						
-						stereo=0;
-						headTracking=1;
-						int type[3] = { stereo, headTracking, 0 };
-					fout2 << "T" << tunnel << "_D" << densities[d] << "_PL" << plc << "_a" << alpha << "_S" << stereo << "_HT" << headTracking << endl;
-					stairCases[count].initialize(sizes[s], alpha, tr, plc, type, densities[d], 0, 0, yRange / 6, 0, INIT_DEPTH_DIFFERENCE, 6, 0, 0, zClosest - zRange / 2);
-					
+				switch (cond)
+				{
+				case 1:
+				{
+					plc = 0;
+					d = 2;
+					tunnel = 0;
+					alpha = 1;
+
+					hollow = true;
+					uneven = false;
+					longBar = false;
+
+					stereo = 1;
+					headTracking = 1;
+					int type[3] = { stereo, headTracking, 0 };
+					fout2 << "T" << tunnel << "_D" << densities[d] << "_PL" << plc << "_a" << alpha << "_S" << stereo << "_HT" << headTracking << "_hol" << endl;
+					stairCases[count].initialize(sizes[s], alpha, tr, plc, hollow, uneven, longBar, type, densities[d], 0, 0, yRange / 6, 0, INIT_DEPTH_DIFFERENCE, 6, 0, 0, zClosest - zRange / 2);
+
 					stairCases[count].setStep(0, 0, STEP_INITIAL, 5, 0, 0, 0);//2
 					count++; //increase staircase count
-				
-					}
 
-					else if(cond == 2){//stereo
-						plc = 0;
-						d = 2;
-						tunnel = 0;
-						alpha = 1;
-						
-						stereo=1;
-						headTracking=0;
-						int type[3] = { stereo, headTracking, 0 };
-					fout2 << "T" << tunnel << "_D" << densities[d] << "_PL" << plc << "_a" << alpha << "_S" << stereo << "_HT" << headTracking << endl;
-					stairCases[count].initialize(sizes[s], alpha, tr, plc, type, densities[d], 0, 0, yRange / 6, 0, INIT_DEPTH_DIFFERENCE, 6, 0, 0, zClosest - zRange / 2);
-					
-					stairCases[count].setStep(0, 0, STEP_INITIAL, 5, 0, 0, 0);//2
-					count++;
-				
-					}
-					else if(cond == 3){//stereo move
-						plc = 0;
-						d = 2;
-						tunnel = 0;
-						alpha = 1;
-					
-						stereo=2;
-						headTracking=0;
-						int type[3] = { stereo, headTracking, 0 };
-					fout2 << "T" << tunnel << "_D" << densities[d] << "_PL" << plc << "_a" << alpha << "_S" << stereo << "_HT" << headTracking << endl;
-					stairCases[count].initialize(sizes[s], alpha, tr, plc, type, densities[d], 0, 0, yRange / 6, 0, INIT_DEPTH_DIFFERENCE, 6, 0, 0, zClosest - zRange / 2);
-					
-					stairCases[count].setStep(0, 0, STEP_INITIAL, 5, 0, 0, 0);//2
-					count++;
-				
-					}
-					else if(cond == 4){ //MP
-						plc = 0;
-						d = 2;
-						tunnel = 0;
-						alpha = 1;
-						
-						stereo=0;
-						headTracking=1;
-						int type[3] = { stereo, headTracking, 0 };
-					fout2 << "T" << tunnel << "_D" << densities[d] << "_PL" << plc << "_a" << alpha << "_S" << stereo << "_HT" << headTracking << endl;
-					stairCases[count].initialize(sizes[s], alpha, tr, plc, type, densities[d], 0, 0, yRange / 6, 0, INIT_DEPTH_DIFFERENCE, 6, 0, 0, zClosest - zRange / 2);
-				
-					stairCases[count].setStep(0, 0, STEP_INITIAL, 5, 0, 0, 0);//2
-					count++;
-				
-					}
-					else if(cond == 5){ //ST + MP, random
-						plc = 0;
-						d = 2;
-						tunnel = 0;
-						alpha = 1;
-					
-						stereo=1;
-						headTracking=1;
-						int type[3] = { stereo, headTracking, 0 };
-					fout2 << "T" << tunnel << "_D" << densities[d] << "_PL" << plc << "_a" << alpha << "_S" << stereo << "_HT" << headTracking << endl;
-					stairCases[count].initialize(sizes[s], alpha, tr, plc, type, densities[d], 0, 0, yRange / 6, 0, INIT_DEPTH_DIFFERENCE, 6, 0, 0, zClosest - zRange / 2);
-				
-					stairCases[count].setStep(0, 0, STEP_INITIAL, 5, 0, 0, 0);//2
-					count++;
-				
-					}
-					else if(cond == 6){//baseline, set alpha = 0 for all squares
-						d = 2;
-						tunnel = 0;
-						stereo = 1;
-						headTracking = 1;
-						alpha = 0;
-						int type[3] = { stereo, headTracking, 0 };
-					fout2 << "T" << tunnel << "_D" << densities[d] << "_PL" << plc << "_a" << alpha << "_S" << stereo << "_HT" << headTracking << endl;
-					stairCases[count].initialize(sizes[s], alpha, tr, plc, type, densities[d], 0, 0, yRange / 6, 0, INIT_DEPTH_DIFFERENCE, 6, 0, 0, zClosest - zRange / 2);
-					
-					stairCases[count].setStep(0, 0, STEP_INITIAL, 5, 0, 0, 0);//2
-					count++;
+					break;
+				}
 
-					}
-					if(cond == 7){//PLC
-						plc = 1;
-						d = 2;
-						tunnel = 0;
-						alpha = 1;
-						stereo = 1;
-						headTracking = 1;
-						int type[3] = { stereo, headTracking, 0 };
-					fout2 << "T" << tunnel << "_D" << densities[d] << "_PL" << plc << "_a" << alpha << "_S" << stereo << "_HT" << headTracking << endl;
-					stairCases[count].initialize(sizes[s], alpha, tr, plc, type, densities[d], 0, 0, yRange / 6, 0, INIT_DEPTH_DIFFERENCE, 6, 0, 0, zClosest - zRange / 2);
-				
-					stairCases[count].setStep(0, 0, STEP_INITIAL, 5, 0, 0, 0);//2
-					count++;
+				case 2:
+				{
+					plc = 0;
+					d = 2;
+					tunnel = 0;
+					alpha = 1;
 
-					}
-					if(cond == 8){//TRANSPARENT UNI
-						plc = 2;
-						d = 2;
-						tunnel = 0;
-						alpha = 0.4;
-						stereo = 1;
-						headTracking = 1;
-						int type[3] = { stereo, headTracking, 0 };
-					fout2 << "T" << tunnel << "_D" << densities[d] << "_PL" << plc << "_a" << alpha << "_S" << stereo << "_HT" << headTracking << endl;
-					stairCases[count].initialize(sizes[s], alpha, tr, plc, type, densities[d], 0, 0, yRange / 6, 0, INIT_DEPTH_DIFFERENCE, 6, 0, 0, zClosest - zRange / 2);
-				
-					stairCases[count].setStep(0, 0, STEP_INITIAL, 5, 0, 0, 0);//2
-					count++;
+					hollow = false;
+					uneven = false;
+					longBar = false;
 
-					}
-					if(cond == 9){//TUNNELING
-						plc = 0;
-						d = 2;
-						tunnel = 1;
-						alpha = 1;
-						stereo = 1;
-						headTracking = 1;
-						int type[3] = { stereo, headTracking, 0 };
-					fout2 << "T" << tunnel << "_D" << densities[d] << "_PL" << plc << "_a" << alpha << "_S" << stereo << "_HT" << headTracking << endl;
-					stairCases[count].initialize(sizes[s], alpha, tr, plc, type, densities[d], tunnel, 0, yRange / 6, 0, INIT_DEPTH_DIFFERENCE, 6, 0, 0, zClosest - zRange / 2);
-				
-					stairCases[count].setStep(0, 0, STEP_INITIAL, 5, 0, 0, 0);//2
-					count++;
+					stereo = 1;
+					headTracking = 1;
+					int type[3] = { stereo, headTracking, 0 };
+					fout2 << "T" << tunnel << "_D" << densities[d] << "_PL" << plc << "_a" << alpha << "_S" << stereo << "_HT" << headTracking << "_hol" << endl;
+					stairCases[count].initialize(sizes[s], alpha, tr, plc, hollow, uneven, longBar, type, densities[d], 0, 0, yRange / 6, 0, INIT_DEPTH_DIFFERENCE, 6, 0, 0, zClosest - zRange / 2);
 
-					}
+					stairCases[count].setStep(0, 0, STEP_INITIAL, 5, 0, 0, 0);//2
+					count++; //increase staircase count
+
+					break;
+				}
+
+				default:
+					
+					break;
+				}
 		
 			NUM_STAIRCASES = count;
 			}
