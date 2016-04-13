@@ -634,17 +634,26 @@ void initializeScene(){
 			if (p[i].z < -MAX_DEPTH_DIFF / 2)
 				p[i].z = -MAX_DEPTH_DIFF / 2;
 
-			p[i].x *= ((i == 0)) ? 1 : -1;
-			p[i].y *= ((i == 0)) ? 1 : -1;
 			p[i].z *= ((i == 0) ^ (testCases[caseNumber].swap) ? 1 : -1);
-			p[i].x += testCases[caseNumber].avgX;
-			p[i].y += testCases[caseNumber].avgY;
 			p[i].z += testCases[caseNumber].avgZ;
-			testCases[caseNumber].offsetX[i] = rand() % (RANDOM_OFFSET * 2) - RANDOM_OFFSET;
-			testCases[caseNumber].offsetY[i] = rand() % (RANDOM_OFFSET * 2) - RANDOM_OFFSET;
-			p[i].x += testCases[caseNumber].offsetX[i];
-			p[i].y += testCases[caseNumber].offsetY[i];
-			//p[i].z+=Zoffset;
+
+			if (stairCases[testCases[caseNumber].stairCase].longBar)
+			{
+				p[i].x = 0;
+				p[i].y = ((i == 0)) ? yRange/6 : -yRange / 6;
+			}
+			else
+			{
+				p[i].x *= ((i == 0)) ? 1 : -1;
+				p[i].y *= ((i == 0)) ? 1 : -1;
+				p[i].x += testCases[caseNumber].avgX;
+				p[i].y += testCases[caseNumber].avgY;
+				testCases[caseNumber].offsetX[i] = rand() % (RANDOM_OFFSET * 2) - RANDOM_OFFSET;
+				testCases[caseNumber].offsetY[i] = rand() % (RANDOM_OFFSET * 2) - RANDOM_OFFSET;
+				p[i].x += testCases[caseNumber].offsetX[i];
+				p[i].y += testCases[caseNumber].offsetY[i];
+				//p[i].z+=Zoffset;
+			}
 		}
 		else
 		{
@@ -653,7 +662,9 @@ void initializeScene(){
 			p[i].y = randNumberRange(-yRange / 2, yRange / 2)*0.85;
 
 			float frontline = min(p[0].z, p[1].z);
+			frontline -= 12 * 1.414; // prevent colliding with target
 			float backline = max(p[0].z, p[1].z);
+			backline += 12 * 1.414; // prevent colliding with target
 
 			if (stairCases[testCases[caseNumber].stairCase].hollow)
 			{
@@ -1008,7 +1019,7 @@ void drawSomeBlurredSquares(int view)
 	if (DRAW_SIDE_PLANES){
 
 		glColor3f(pow(0.0, 2.2), pow(0.1, 2.2), pow(0.3, 2.2)); //no gamma correction
-		double depth = 0;//zClosest+zRange/2
+		double depth = stairCases[testCases[caseNumber].stairCase].longBar ? zRange/2 : 0;//zClosest+zRange/2
 		double length = xRange / 3.3;
 		glBegin(GL_QUADS);
 		//glTexCoord2f(-100, 0.0); 
@@ -1055,12 +1066,14 @@ void drawSomeBlurredSquares(int view)
 			quickSort(p, 2, testCases[caseNumber].numSquares - 1);
 			glEnable(GL_BLEND);
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);//i added
+
+			float targetWidth = stairCases[testCases[caseNumber].stairCase].longBar ? 200 : 24;
 			
 			//First Render red squares as is to keep comparisons correct in Shayan's original code
 			for (int i = 0; i < 2; i++)
 			{
 			
-				drawBlurredSquare(p[i].x, p[i].y, p[i].z, p[i].rotX, p[i].rotY, p[i].rotZ, p[i].albedoR / 255.0, p[i].albedoG / 255.0, p[i].albedoB / 255.0, p[i].alpha / 255.0, 24, 12, b*toggleBlur, i == 0, i == 1);
+				drawBlurredSquare(p[i].x, p[i].y, p[i].z, p[i].rotX, p[i].rotY, p[i].rotZ, p[i].albedoR / 255.0, p[i].albedoG / 255.0, p[i].albedoB / 255.0, p[i].alpha / 255.0, targetWidth, 12, b*toggleBlur, i == 0, i == 1);
 			
 			}
 			//render CLUTTER back to front
@@ -2017,9 +2030,9 @@ void specialKeys(int key, int x, int y)
 
 					hollow = true;
 					uneven = false;
-					longBar = false;
+					longBar = true;
 
-					stereo = 0;
+					stereo = 1;
 					headTracking = 1;
 					int type[3] = { stereo, headTracking, 0 };
 					fout2 << "T" << tunnel << "_D" << densities[d] << "_PL" << plc << "_a" << alpha << "_S" << stereo << "_HT" << headTracking << "_hol" << hollow << endl;
@@ -2038,11 +2051,11 @@ void specialKeys(int key, int x, int y)
 					tunnel = 0;
 					alpha = 1;
 
-					hollow = false;
+					hollow = true;
 					uneven = false;
-					longBar = false;
+					longBar = true;
 
-					stereo = 0;
+					stereo = 1;
 					headTracking = 1;
 					int type[3] = { stereo, headTracking, 0 };
 					fout2 << "T" << tunnel << "_D" << densities[d] << "_PL" << plc << "_a" << alpha << "_S" << stereo << "_HT" << headTracking << "_hol" << hollow << endl;
