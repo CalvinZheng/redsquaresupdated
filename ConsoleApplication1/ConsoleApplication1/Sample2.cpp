@@ -1137,9 +1137,9 @@ void drawSomeBlurredSquares(int view)
 		double length = xRange / 3.3;
 		glBegin(GL_QUADS);
 		//glTexCoord2f(-100, 0.0); 
-		glVertex3f(-2 * length, -1000, depth);
+		glVertex3f(-3 * length, -1000, depth);
 		//glTexCoord2f(b*1.0/numBlurWidths,1.0);          
-		glVertex3f(-2 * length, +1000, depth);
+		glVertex3f(-3 * length, +1000, depth);
 		//glTexCoord2f((b+1)*1.0/numBlurWidths,1.0);
 		glVertex3f(-length, +1000, depth);
 		//glTexCoord2f((b+1)*1.0/numBlurWidths, 0.0);
@@ -1147,9 +1147,9 @@ void drawSomeBlurredSquares(int view)
 		glEnd();
 		glBegin(GL_QUADS);
 		//glTexCoord2f(-100, 0.0); 
-		glVertex3f(2 * length, -1000, depth);
+		glVertex3f(3 * length, -1000, depth);
 		//glTexCoord2f(b*1.0/numBlurWidths,1.0);          
-		glVertex3f(2 * length, +1000, depth);
+		glVertex3f(3 * length, +1000, depth);
 		//glTexCoord2f(b+1)*1.0/numBlurWidths,1.0);
 		glVertex3f(+length, +1000, depth);
 		//glTexCoord2f((b+1)*1.0/numBlurWidths, 0.0);
@@ -1181,13 +1181,17 @@ void drawSomeBlurredSquares(int view)
 			glEnable(GL_BLEND);
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);//i added
 
-			float targetWidth = stairCases[testCases[caseNumber].stairCase].longBar ? 200 : 24;
-			
+			float targetWidth = stairCases[testCases[caseNumber].stairCase].longBar ? 250 : 24;
+			float targetHeight = 12;
+
 			//First Render red squares as is to keep comparisons correct in Shayan's original code
 			for (int i = 0; i < 2; i++)
 			{
-			
-				drawBlurredSquare(p[i].x, p[i].y, p[i].z, p[i].rotX, p[i].rotY, p[i].rotZ, p[i].albedoR / 255.0, p[i].albedoG / 255.0, p[i].albedoB / 255.0, p[i].alpha / 255.0, targetWidth, 12, b*toggleBlur, i == 0, i == 1);
+
+				float fixSizeFactor = ((TRACKING_CLOSE_Z + TRACKING_FAR_Z) / 2 - p[i].z) / ((TRACKING_CLOSE_Z + TRACKING_FAR_Z) / 2 - zMid);
+				targetHeight *= fixSizeFactor;
+				targetWidth *= fixSizeFactor;
+				drawBlurredSquare(p[i].x, p[i].y, p[i].z, p[i].rotX, p[i].rotY, p[i].rotZ, p[i].albedoR / 255.0, p[i].albedoG / 255.0, p[i].albedoB / 255.0, p[i].alpha / 255.0, targetWidth, targetHeight, b*toggleBlur, i == 0, i == 1);
 			
 			}
 			//render CLUTTER back to front
