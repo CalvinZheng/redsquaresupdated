@@ -234,8 +234,8 @@ Square3D surf[MAX_DENSITY*MAX_DENSITY];
 Square3D p[MAXNUMSQUARES];
 
 //reserved for shuffling and re-sorting experiment blocks
-std::array<int, 2> foo = { 1, 2 };
-std::array<array<double,2>,2> thresholdResults;			
+std::array<int, 1> foo = { 1};
+std::array<array<double,2>,1> thresholdResults;			
 bool myFunc(array<double,2> a, array<double,2> b)
 	{ return a[0]<b[0];}
 
@@ -666,8 +666,121 @@ void initializeScene(){
 			float backline = max(p[0].z, p[1].z);
 			backline += 12 * 1.414; // prevent colliding with target
 
-			if (stairCases[testCases[caseNumber].stairCase].hollow)
+			if (stairCases[testCases[caseNumber].stairCase].hollow && stairCases[testCases[caseNumber].stairCase].uneven)
 			{
+				// visibility cue only
+				if (stairCases[testCases[caseNumber].stairCase].longBar)
+				{
+					float unevenRate = (p[0].z - zMid + zRange / 2) / zRange;
+					if (p[i].y > 0)
+					{
+						if (randNumber() < unevenRate)
+						{
+							p[i].z = randNumberRange(zMid - zRange / 2, frontline);
+						}
+						else
+						{
+							p[i].z = randNumberRange(backline, zMid + zRange / 2);
+						}
+					}
+					else
+					{
+						unevenRate = (p[1].z - zMid + zRange / 2) / zRange;
+						if (randNumber() < unevenRate)
+						{
+							p[i].z = randNumberRange(zMid - zRange / 2, frontline);
+						}
+						else
+						{
+							p[i].z = randNumberRange(backline, zMid + zRange / 2);
+						}
+					}
+				}
+				else
+				{
+					float unevenRate = (p[0].z - zMid + zRange / 2) / zRange;
+					if (p[i].x > 0)
+					{
+						if (randNumber() < unevenRate)
+						{
+							p[i].z = randNumberRange(zMid - zRange / 2, frontline);
+						}
+						else
+						{
+							p[i].z = randNumberRange(backline, zMid + zRange / 2);
+						}
+					}
+					else
+					{
+						unevenRate = (p[1].z - zMid + zRange / 2) / zRange;
+						if (randNumber() < unevenRate)
+						{
+							p[i].z = randNumberRange(zMid - zRange / 2, frontline);
+						}
+						else
+						{
+							p[i].z = randNumberRange(backline, zMid + zRange / 2);
+						}
+					}
+				}
+			}
+			else if (stairCases[testCases[caseNumber].stairCase].uneven)
+			{
+				// context cue only
+				if (stairCases[testCases[caseNumber].stairCase].longBar)
+				{
+					if (p[i].y > 0)
+					{
+						if (rand() % 2 == 0)
+						{
+							p[i].z = randNumberRange(zMid - zRange / 2, p[0].z);
+						}
+						else
+						{
+							p[i].z = randNumberRange(p[0].z, zMid + zRange / 2);
+						}
+					}
+					else
+					{
+						if (rand() % 2 == 0)
+						{
+							p[i].z = randNumberRange(zMid - zRange / 2, p[1].z);
+						}
+						else
+						{
+							p[i].z = randNumberRange(p[1].z, zMid + zRange / 2);
+						}
+					}
+				}
+				else
+				{
+					if (p[i].x > 0)
+					{
+						if (rand() % 2 == 0)
+						{
+							p[i].z = randNumberRange(zMid - zRange / 2, p[0].z);
+						}
+						else
+						{
+							p[i].z = randNumberRange(p[0].z, zMid + zRange / 2);
+						}
+					}
+					else
+					{
+						if (rand() % 2 == 0)
+						{
+							p[i].z = randNumberRange(zMid - zRange / 2, p[1].z);
+						}
+						else
+						{
+							p[i].z = randNumberRange(p[1].z, zMid + zRange / 2);
+						}
+					}
+				}
+			}
+			else if (stairCases[testCases[caseNumber].stairCase].hollow)
+			{
+				// no cue
 				if (rand() % 2 == 0)
 				{
 					p[i].z = randNumberRange(zMid - zRange / 2, frontline);
@@ -679,6 +792,7 @@ void initializeScene(){
 			}
 			else
 			{
+				// both cue
 				p[i].z = zMid + randNumberRange(-zRange / 2, zRange / 2);
 			}
 
@@ -2029,8 +2143,8 @@ void specialKeys(int key, int x, int y)
 					alpha = 1;
 
 					hollow = true;
-					uneven = false;
-					longBar = true;
+					uneven = true;
+					longBar = false;
 
 					stereo = 1;
 					headTracking = 1;
@@ -2047,13 +2161,13 @@ void specialKeys(int key, int x, int y)
 				case 2:
 				{
 					plc = 0;
-					d = 2;
+					d = 1;
 					tunnel = 0;
 					alpha = 1;
 
-					hollow = true;
+					hollow = false;
 					uneven = false;
-					longBar = true;
+					longBar = false;
 
 					stereo = 1;
 					headTracking = 1;
