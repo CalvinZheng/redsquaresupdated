@@ -402,10 +402,10 @@ public:
 
 			
 
-			if (depthDiff>zRange / 2)
-				depthDiff = zRange / 2;
-			if (depthDiff<-zRange / 2)
-				depthDiff = -zRange / 2;
+			//if (depthDiff>zRange / 2)
+			//	depthDiff = zRange / 2;
+			//if (depthDiff<-zRange / 2)
+			//	depthDiff = -zRange / 2;
 		}
 		/*density=reference.density+d;
 		if(density<2) density =2;
@@ -1133,7 +1133,7 @@ void drawSomeBlurredSquares(int view)
 	if (DRAW_SIDE_PLANES){
 
 		glColor3f(pow(0.0, 2.2), pow(0.1, 2.2), pow(0.3, 2.2)); //no gamma correction
-		double depth = stairCases[testCases[caseNumber].stairCase].longBar ? zRange/2 : 0;//zClosest+zRange/2
+		double depth = stairCases[testCases[caseNumber].stairCase].longBar ? zRange / 2 - 10 : 0;//zClosest+zRange/2
 		double length = xRange / 3.3;
 		glBegin(GL_QUADS);
 		//glTexCoord2f(-100, 0.0); 
