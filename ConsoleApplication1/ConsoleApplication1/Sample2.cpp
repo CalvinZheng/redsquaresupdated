@@ -234,8 +234,8 @@ Square3D surf[MAX_DENSITY*MAX_DENSITY];
 Square3D p[MAXNUMSQUARES];
 
 //reserved for shuffling and re-sorting experiment blocks
-std::array<int, 1> foo = { 1};
-std::array<array<double,2>,1> thresholdResults;			
+std::array<int, 26> foo = { 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26};
+std::array<array<double,2>,26> thresholdResults;			
 bool myFunc(array<double,2> a, array<double,2> b)
 	{ return a[0]<b[0];}
 
@@ -2143,32 +2143,7 @@ void specialKeys(int key, int x, int y)
 				int stereo = 0, headTracking = 0;		
 				
 				// SELECT A CONDITION/STAIRCASE
-				switch (cond)
-				{
-				case 1:
-				{
-					plc = 0;
-					d = 2;
-					tunnel = 0;
-					alpha = 1;
-
-					hollow = true;
-					uneven = true;
-					longBar = false;
-
-					stereo = 1;
-					headTracking = 1;
-					int type[3] = { stereo, headTracking, 0 };
-					fout2 << "T" << tunnel << "_D" << densities[d] << "_PL" << plc << "_a" << alpha << "_S" << stereo << "_HT" << headTracking << "_hol" << hollow << endl;
-					stairCases[count].initialize(sizes[s], alpha, tr, plc, hollow, uneven, longBar, type, densities[d], 0, 0, yRange / 6, 0, INIT_DEPTH_DIFFERENCE, 6, 0, 0, zClosest - zRange / 2);
-
-					stairCases[count].setStep(0, 0, STEP_INITIAL, 5, 0, 0, 0);//2
-					count++; //increase staircase count
-
-					break;
-				}
-
-				case 2:
+				if (cond == 1)
 				{
 					plc = 0;
 					d = 1;
@@ -2187,13 +2162,50 @@ void specialKeys(int key, int x, int y)
 
 					stairCases[count].setStep(0, 0, STEP_INITIAL, 5, 0, 0, 0);//2
 					count++; //increase staircase count
-
-					break;
 				}
+				else if (cond <= 15)
+				{
+					int i = cond - 2;
 
-				default:
-					
-					break;
+					plc = 0;
+					d = 2;
+					tunnel = 0;
+					alpha = 1;
+
+					hollow = i % 4 == 1 || i % 4 == 2;
+					uneven = i % 4 == 1 || i % 4 == 3;
+					longBar = false;
+
+					stereo = i / 4 == 0 || i / 4 == 2;
+					headTracking = i / 4 == 1 || i / 4 == 2;
+					int type[3] = { stereo, headTracking, 0 };
+					fout2 << "T" << tunnel << "_D" << densities[d] << "_PL" << plc << "_a" << alpha << "_S" << stereo << "_HT" << headTracking << "_hol" << hollow << endl;
+					stairCases[count].initialize(sizes[s], alpha, tr, plc, hollow, uneven, longBar, type, densities[d], 0, 0, yRange / 6, 0, INIT_DEPTH_DIFFERENCE, 6, 0, 0, zClosest - zRange / 2);
+
+					stairCases[count].setStep(0, 0, STEP_INITIAL, 5, 0, 0, 0);//2
+					count++; //increase staircase count
+				}
+				else
+				{
+					int i = cond - 16;
+
+					plc = 0;
+					d = 2;
+					tunnel = 0;
+					alpha = 1;
+
+					hollow = i % 3 == 1;
+					uneven = i % 3 == 1 || i % 3 == 2;
+					longBar = true;
+
+					stereo = i / 3 == 0 || i / 3 == 2;
+					headTracking = i / 3 == 1 || i / 3 == 2;
+					int type[3] = { stereo, headTracking, 0 };
+					fout2 << "T" << tunnel << "_D" << densities[d] << "_PL" << plc << "_a" << alpha << "_S" << stereo << "_HT" << headTracking << "_hol" << hollow << endl;
+					stairCases[count].initialize(sizes[s], alpha, tr, plc, hollow, uneven, longBar, type, densities[d], 0, 0, yRange / 6, 0, INIT_DEPTH_DIFFERENCE, 6, 0, 0, zClosest - zRange / 2);
+
+					stairCases[count].setStep(0, 0, STEP_INITIAL, 5, 0, 0, 0);//2
+					count++; //increase staircase count
 				}
 		
 			NUM_STAIRCASES = count;
