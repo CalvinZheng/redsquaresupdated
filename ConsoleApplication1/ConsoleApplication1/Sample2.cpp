@@ -135,7 +135,7 @@ double rotations[3] = { 10, 45, 90 };
 #define MAX_DEPTH_DIFF 220
 #define SCALE_FOR_LOG 0.8
 
-bool disabled, tooFar, tilted, not_moving, rest, randomChoiceFlag = false, answer = false;
+bool disabled, tooFar, tilted, not_moving, rest, randomChoiceFlag = false, answer = false, noChoiceFlag = false;
 static int block_beginning = 0;
 double IOD = 65;
 int mcount = 0;
@@ -1736,7 +1736,11 @@ void stereoDisplay(void)
 	if (gettime(1, false)>RANDOM_CHOICE_TIMER)
 	{
 		//skip = false;
-		specialKeys((randNumber()>0.5) ? GLUT_KEY_LEFT : GLUT_KEY_RIGHT, 0, 0);
+		noChoiceFlag = true;
+		if (stairCases[testCases[caseNumber].stairCase].longBar)
+			specialKeys((randNumber()>0.5) ? GLUT_KEY_UP : GLUT_KEY_DOWN, 0, 0);
+		else
+			specialKeys((randNumber()>0.5) ? GLUT_KEY_LEFT : GLUT_KEY_RIGHT, 0, 0);
 		randomChoiceFlag = true;
 	}
 
@@ -2075,10 +2079,12 @@ void specialKeys(int key, int x, int y)
 	//moveTimer = 0;
 	//keyg=key;
 	bool first = true;
+	bool isLongBar = stairCases[testCases[caseNumber].stairCase].longBar;
 
 	if (rest)
 		return;
-	if (key == GLUT_KEY_LEFT || key == GLUT_KEY_RIGHT || key == GLUT_KEY_UP)
+	if ((!isLongBar && (key == GLUT_KEY_LEFT || key == GLUT_KEY_RIGHT))
+		|| (isLongBar && (key == GLUT_KEY_UP || key == GLUT_KEY_DOWN)))
 	{
 
 		randomChoiceTimer = 0;
@@ -2194,8 +2200,17 @@ void specialKeys(int key, int x, int y)
 			}
 		}
 		else{ //check if correct
+			if (noChoiceFlag)
+			{
+				// only check correctness when user did a selection
+				// when user didnot respond quickly enough, a random input was generated, and the following checks will be skipped
+				noChoiceFlag = false;
+				initializeScene();
+				return;
+			}
+
 			bool correct = false;
-			if (key == GLUT_KEY_RIGHT){
+			if (key == GLUT_KEY_RIGHT || key == GLUT_KEY_UP) {
 				testCases[caseNumber].chosen = true;
 				keyg = 22;
 				if (p[0].z>p[1].z)
@@ -2204,7 +2219,7 @@ void specialKeys(int key, int x, int y)
 				else
 					correct = false;
 			}
-			else if (key == GLUT_KEY_LEFT){
+			else if (key == GLUT_KEY_LEFT || key == GLUT_KEY_DOWN) {
 				testCases[caseNumber].chosen = false;
 				keyg = 11;
 				if (p[0].z<p[1].z)
