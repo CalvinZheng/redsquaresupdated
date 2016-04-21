@@ -125,9 +125,9 @@ double rotations[3] = { 10, 45, 90 };
 #define STEP_DECREASE 1	
 #define STEP_DOWN_UP_RATIO 0.2845	
 #define STEP_INITIAL 0.5 //5	
-#define EXIT_CONDITION 14 //10 //14	
-#define N_LAST_REVERSALS 6
-#define INIT_DEPTH_DIFFERENCE 12
+#define EXIT_CONDITION 12 //10 //14	
+#define N_LAST_REVERSALS 10
+#define INIT_DEPTH_DIFFERENCE 40
 #define BLOCK_BEGINNING 1
 #define sizeRange 0.8
 #define DEPTH_WARP_INTENSITY 2
@@ -234,7 +234,7 @@ Square3D surf[MAX_DENSITY*MAX_DENSITY];
 Square3D p[MAXNUMSQUARES];
 
 //reserved for shuffling and re-sorting experiment blocks
-std::array<int, 26> foo = { 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26};
+std::array<int, 26> foo = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26};
 std::array<array<double,2>,26> thresholdResults;			
 bool myFunc(array<double,2> a, array<double,2> b)
 	{ return a[0]<b[0];}
