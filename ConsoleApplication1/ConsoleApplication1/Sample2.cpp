@@ -135,7 +135,7 @@ double rotations[3] = { 10, 45, 90 };
 #define MAX_DEPTH_DIFF 220
 #define SCALE_FOR_LOG 0.8
 
-bool disabled, tooFar, tilted, not_moving, rest, randomChoiceFlag = false, answer = false, noChoiceFlag = false;
+bool disabled, tooFar, tilted, not_moving, moveTooMuch, rest, randomChoiceFlag = false, answer = false, noChoiceFlag = false;
 static int block_beginning = 0;
 double IOD = 65;
 int mcount = 0;
@@ -1469,10 +1469,14 @@ void updateTrackerPosition()
 		not_moving = true;
 		disabled = true;
 	}
-	if (/*testCases[caseNumber].headMotion &&*/(testCases[caseNumber].type[TYPE_STEREO] == 1 && testCases[caseNumber].type[TYPE_TRACKER] == 0) && dist>200)
+	if (/*testCases[caseNumber].headMotion &&*/(testCases[caseNumber].type[TYPE_TRACKER] == 0) && dist>DIST_THRESH)
 	{
-		not_moving = false;
+		moveTooMuch = true;
 		disabled = true;
+	}
+	else
+	{
+		moveTooMuch = false;
 	}
 	//printf("%d\n",dist);
 	pastviewers[nowPosViewer][0] = record.x;
@@ -1884,7 +1888,7 @@ void display(int view)
 			glutStrokeCharacter(GLUT_STROKE_ROMAN, 'e');
 		}
 		*/
-		if (testCases[caseNumber].type[TYPE_STEREO] == 1 && testCases[caseNumber].type[TYPE_TRACKER] == 0 && disabled&&!tooFar){
+		if (testCases[caseNumber].type[TYPE_TRACKER] == 0 && disabled&&moveTooMuch){
 			glPushMatrix();
 			//glScalef(0.4, 0.5, 0.4);
 			//glTranslatef(-140, -110, 0);
