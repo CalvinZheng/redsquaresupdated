@@ -1157,6 +1157,21 @@ void drawSomeBlurredSquares(int view)
 		glEnd();
 
 
+		glBegin(GL_QUADS); 
+		glVertex3f(-250, -100, 0);       
+		glVertex3f(-250, 100, 0);
+		glVertex3f(-249, 100, 0);
+		glVertex3f(-249, -100, 0);
+		glEnd();
+
+		float progress = (float)(chosenStairCase+1) / foo.size();
+
+		glBegin(GL_QUADS);
+		glVertex3f(-251, -100, 0);
+		glVertex3f(-251, progress*200-100, 0);
+		glVertex3f(-250, progress * 200 - 100, 0);
+		glVertex3f(-250, -100, 0);
+		glEnd();
 	}
 	glEnable(GL_TEXTURE_2D);
 	glEnable(GL_BLEND);
@@ -1751,8 +1766,11 @@ void stereoDisplay(void)
 }
 void drawSphere(void)
 {
-	glTranslatef(viewer[0][0], viewer[0][1], -5);
+	glColor3f(0, 0, 0);
+	glPushMatrix();
+	glTranslatef(viewer[0][0], viewer[0][1], viewer[0][2]);
 	glutSolidSphere(5, 30, 30);
+	glPopMatrix();
 }
 
 void display(int view)
@@ -2218,8 +2236,8 @@ void specialKeys(int key, int x, int y)
 		else{ //check if correct
 			if (noChoiceFlag)
 			{
-				// only check correctness when user did a selection
-				// when user didnot respond quickly enough, a random input was generated, and the following checks will be skipped
+				// when user respond too slow, noChoiceFlag is on
+				// do not do anything, just regenerate the scene
 				noChoiceFlag = false;
 				initializeScene();
 				return;
