@@ -341,6 +341,8 @@ public:
 	double offsetX[2];
 	double offsetY[2], alpha;
 	int stairCase;
+	bool randomnizedBlockedEyeForMono;
+
 	TestCase(){
 	}
 	void initialize(double al, bool tr, int plc, int t[3], int D, bool tun, bool h, double iX, double iY, double iZ, double hh, double iAvgX, double iAvgY, double iAvgZ, int gSCN){
@@ -372,7 +374,7 @@ public:
 		depthDiff = iZ;
 		heightZ = hh;
 		alpha = al;
-
+		randomnizedBlockedEyeForMono = rand() % 2;
 	}
 	bool increase(TestCase reference, bool flag2down, int d, double dX, double dY, double dZ, double dh, double dAvgX = 0, double dAvgY = 0, double dAvgZ = 0){
 		/*if (reference.result && !flag2down)
@@ -649,6 +651,7 @@ void initializeScene(){
 				p[i].x += testCases[caseNumber].avgX;
 				p[i].y += testCases[caseNumber].avgY;
 				testCases[caseNumber].offsetX[i] = rand() % (RANDOM_OFFSET * 2) - RANDOM_OFFSET;
+				testCases[caseNumber].offsetX[i] *= 0.75;		// X random was too high, causing target overlap with side planes somtimes.
 				testCases[caseNumber].offsetY[i] = rand() % (RANDOM_OFFSET * 2) - RANDOM_OFFSET;
 				p[i].x += testCases[caseNumber].offsetX[i];
 				p[i].y += testCases[caseNumber].offsetY[i];
@@ -1509,12 +1512,13 @@ void updateTrackerPosition()
 		//tilted = true;
 	}
 
-	if (testCases[caseNumber].type[TYPE_STEREO] == false)
-	{
-		viewer[0][0] = viewer[1][0] = (viewer[0][0] + viewer[1][0]) / 2;  //x
-		viewer[0][1] = viewer[1][1] = (viewer[0][1] + viewer[1][1]) / 2;  //y
-		viewer[0][2] = viewer[1][2] = (viewer[0][2] + viewer[1][2]) / 2;  //z
-	}
+	// new mono mechanism, randomly block one eye, but the scene is still rendered in 3D
+	//if (testCases[caseNumber].type[TYPE_STEREO] == false)
+	//{
+	//	viewer[0][0] = viewer[1][0] = (viewer[0][0] + viewer[1][0]) / 2;  //x
+	//	viewer[0][1] = viewer[1][1] = (viewer[0][1] + viewer[1][1]) / 2;  //y
+	//	viewer[0][2] = viewer[1][2] = (viewer[0][2] + viewer[1][2]) / 2;  //z
+	//}
 
 	if (!rest)
 	{
@@ -1606,7 +1610,7 @@ void stereoDisplay(void)
 	if (testCases[caseNumber].type[TYPE_STEREO] > 0)
 		display(1);
 	else
-		display(0);
+		display(1);		// new mono mechanism, randomly block one eye, but the scene is still rendered in 3D
 	glFlush();
 	//	}
 	//count red pixels
@@ -1764,11 +1768,11 @@ void stereoDisplay(void)
 	}
 
 }
-void drawSphere(void)
+void drawMonoEyeBlock(bool leftOrRightEye)
 {
 	glColor3f(0, 0, 0);
 	glPushMatrix();
-	glTranslatef(viewer[0][0], viewer[0][1], viewer[0][2]);
+	glTranslatef(viewer[leftOrRightEye][0], viewer[leftOrRightEye][1], viewer[leftOrRightEye][2]);
 	glutSolidSphere(5, 30, 30);
 	glPopMatrix();
 }
@@ -1961,7 +1965,12 @@ void display(int view)
 		}
 		glPopMatrix();
 		glDisable(GL_TEXTURE_2D);
-		//drawSphere();
+
+		if (testCases[caseNumber].type[TYPE_STEREO] == false)
+		{
+			drawMonoEyeBlock(testCases[caseNumber].randomnizedBlockedEyeForMono);
+		}
+
 		timerBetweenCases++;
 		if (DEMO_MODE){
 			if (paused || !disabled && gettime(1, false) > TIME_BETWEEN_CASES)
