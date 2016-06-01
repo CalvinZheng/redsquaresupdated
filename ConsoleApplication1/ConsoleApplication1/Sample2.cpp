@@ -275,6 +275,7 @@ public:
 	double dX, dY, dZ, dh, dAvgX, dAvgY, dAvgZ;
 	double alpha, size;
 	int numReversals;
+	bool randomnizedBlockedEyeForMono;
 	void initialize(double s, double al, bool tr, int plc, bool hollow, bool uneven, bool longBar, int t[3], double iD, bool tun, bool h, double iX, double iY, double iZ, double ih, double iAvgX, double iAvgY, double iAvgZ){
 		flag2down = false;
 		reducedStep = false;
@@ -302,6 +303,7 @@ public:
 		this->hollow = hollow;
 		this->uneven = uneven;
 		this->longBar = longBar;
+		randomnizedBlockedEyeForMono = rand() % 2;
 	}
 	void setStep(double x, double y, double z, double h, double avgX, double avgY, double avgZ){
 		dX = x;
@@ -341,7 +343,6 @@ public:
 	double offsetX[2];
 	double offsetY[2], alpha;
 	int stairCase;
-	bool randomnizedBlockedEyeForMono;
 
 	TestCase(){
 	}
@@ -374,7 +375,6 @@ public:
 		depthDiff = iZ;
 		heightZ = hh;
 		alpha = al;
-		randomnizedBlockedEyeForMono = rand() % 2;
 	}
 	bool increase(TestCase reference, bool flag2down, int d, double dX, double dY, double dZ, double dh, double dAvgX = 0, double dAvgY = 0, double dAvgZ = 0){
 		/*if (reference.result && !flag2down)
@@ -1968,7 +1968,7 @@ void display(int view)
 
 		if (testCases[caseNumber].type[TYPE_STEREO] == false)
 		{
-			drawMonoEyeBlock(testCases[caseNumber].randomnizedBlockedEyeForMono);
+			drawMonoEyeBlock(stairCases[testCases[caseNumber].stairCase].randomnizedBlockedEyeForMono);
 		}
 
 		timerBetweenCases++;
