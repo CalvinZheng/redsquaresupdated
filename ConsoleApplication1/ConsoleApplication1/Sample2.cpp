@@ -206,7 +206,15 @@ public:
 	GLubyte albedoG;
 	GLubyte albedoB;
 	GLubyte alpha;
+	float texture[32];
 
+	void generateTexture()
+	{
+		for (int i = 0; i < 32; i++)
+		{
+			texture[i] = randNumberRange(0.1, 1);
+		}
+	}
 };
 
 //  Our scene will have many squares in it. 
@@ -627,6 +635,8 @@ void initializeScene(){
 		//for 2 red squares
 		if (i == 0 || i == 1)
 		{
+			//p[i].generateTexture();
+
 			p[i].x = testCases[caseNumber].blueGreenX;
 			p[i].y = testCases[caseNumber].blueGreenY;
 			//p[i].z = testCases[caseNumber].depthDiff;
@@ -1209,6 +1219,15 @@ void drawSomeBlurredSquares(int view)
 				float fixSizeFactor = ((TRACKING_CLOSE_Z + TRACKING_FAR_Z) / 2 - p[i].z) / ((TRACKING_CLOSE_Z + TRACKING_FAR_Z) / 2 - zMid);
 				targetHeight *= fixSizeFactor;
 				targetWidth *= fixSizeFactor;
+
+				// for texture
+				//for (int j = 0; j < 4; j++)
+				//{
+				//	for (int k = 0; k < 8; k++)
+				//	{
+				//		drawBlurredSquare(p[i].x - targetWidth / 8 * (3.5f - k), p[i].y - targetHeight/4*(1.5f - j), p[i].z, p[i].rotX, p[i].rotY, p[i].rotZ, p[i].albedoR / 255.0 * p[i].texture[j*8+k], p[i].albedoG / 255.0, p[i].albedoB / 255.0, p[i].alpha / 255.0, targetWidth/8, targetHeight/4, b*toggleBlur, i == 0, i == 1);
+				//	}
+				//}
 				drawBlurredSquare(p[i].x, p[i].y, p[i].z, p[i].rotX, p[i].rotY, p[i].rotZ, p[i].albedoR / 255.0, p[i].albedoG / 255.0, p[i].albedoB / 255.0, p[i].alpha / 255.0, targetWidth, targetHeight, b*toggleBlur, i == 0, i == 1);
 			
 			}
